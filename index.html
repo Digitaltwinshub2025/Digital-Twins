@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Digital Twins Hub - Visualize and manage your digital twins"
+    />
+
+    <!-- Fonts (same as your template) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Poppins:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind CDN (keeps your format without rewriting all classes) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- jsPDF (used in Projects export) -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+    <!-- Your custom CSS -->
+    <link rel="stylesheet" href="./styles.css" />
+
+    <title>Digital Twins Hub</title>
+  </head>
+
+  <body class="min-h-screen bg-gray-50">
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+
+    <!-- Navbar -->
+    <header id="navbar"></header>
+
+    <!-- Main content -->
+    <main class="container mx-auto px-4 py-8">
+      <div id="app"></div>
+    </main>
+
+    <!-- Chat assistant (simple placeholder bubble) -->
+    <div id="chat-assistant"></div>
+
+    <!-- Toast notifications -->
+    <div id="toasts" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] space-y-2"></div>
+
+    <!-- Data + App -->
+    <script src="./projectsCatalog.js?v=20260205"></script>
+    <script src="./app.js?v=20260205"></script>
+  </body>
+</html>

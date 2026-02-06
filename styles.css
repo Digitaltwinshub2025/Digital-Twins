@@ -1,0 +1,94 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+ #app {
+   transition: opacity 260ms ease, transform 320ms ease;
+   will-change: opacity, transform;
+ }
+
+ .app-transitioning {
+   opacity: 0;
+   transform: translateY(6px);
+ }
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Custom animations */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes textEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.enter-text {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: textEnter 520ms ease forwards;
+  animation-delay: var(--enter-delay, 0ms);
+}
+
+@keyframes fadeEnter {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+.enter-fade {
+  opacity: 0;
+  filter: blur(6px);
+  animation: fadeEnter 700ms ease forwards;
+  animation-delay: var(--enter-delay, 0ms);
+}
+
+/* Small helper so modal body text looks decent if HTML is injected */
+.prose p {
+  margin: 0.75rem 0;
+}

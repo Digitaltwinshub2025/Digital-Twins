@@ -1,0 +1,2248 @@
+/* app.js - Vanilla JS version of your React app, keeping the same Tailwind-based format */
+
+(function () {
+  const appEl = document.getElementById("app");
+  const navbarEl = document.getElementById("navbar");
+  const chatEl = document.getElementById("chat-assistant");
+  const toastsEl = document.getElementById("toasts");
+
+  const LEADER_FADE_MS = 700;
+  const LEADER_INTERVAL_MS = 5000;
+
+  const TEAM_STORAGE_KEY = "dt_team_members";
+  const FALLBACK_MEMBERS = [
+    { name: "Meri Sargsian", role: "ShadeLA ProjectHUB", img: "https://placehold.co/254x240", slug: "meri-sargsian" },
+    {
+      name: "Omid Ahmadi",
+      role: "Software Engineer • Project Lead",
+      img: "Team Members/Omid-Ahmadi.jpg.jpeg",
+      slug: "omid-ahmadi",
+      sortOrder: 1,
+      bio:
+        "I worked at AT&T (DIRECTV) as a Quality Assurance on a project called SignalSaver / RainFade. This technology allows viewers to continue watching through the internet whenever there is a streaming interruption, or automatically switch if the satellite signal is lost. After two years of development and testing, we successfully released it to the market, and in 2024 the project received an award.",
+      highlights: [
+        "Led SignalSaver / RainFade quality assurance at AT&T (DIRECTV).",
+        "Helped launch an award-winning resiliency feature for satellite TV.",
+      ],
+      skills: [
+        "C / C++ / Java",
+        "Python (in progress)",
+        "API / Postman / Rest Assured",
+        "MySQL",
+        "CI/CD / Jenkins",
+        "Selenium / Cucumber (BDD)",
+        "Agile / Scrum / Waterfall",
+        "SDLC / STLC",
+        "Google Docs / Sheets / Slides",
+      ],
+      experience: [
+        "Quality Assurance at AT&T (DIRECTV) on SignalSaver / RainFade.",
+        "Helped launch a resilience feature that keeps satellite TV streaming via internet during outages.",
+        "Two years of development and testing leading to a 2024 project award.",
+      ],
+    },
+    {
+      name: "Mario Chong Loo",
+      role: "Software Engineer",
+      img: "Team Members/mario.png",
+      slug: "mario-chong-loo",
+      sortOrder: 2,
+      education: ["East Los Angeles College", "Cal Poly Pomona"],
+      skills: [
+        "C++",
+        "Java",
+        "Python",
+        "HTML",
+        "CSS",
+        "SQL",
+        "JavaScript",
+        "MS Office",
+        "AI",
+        "Front/Back End Development",
+      ],
+      experience: ["Previous intern @ SCEC, Saniset Fleet, and BuildLACCD.", "IT Support Technician @ RiverStreamz."],
+      languages: ["English (fluent)", "Spanish (fluent)", "Chinese (spoken)"],
+      extracurriculars: ["SHPE", "STEM Advantage", "MESA", "Attended HACKMESA 2025 and BroncoHacks 2025", "GameGala 2025: Judged K–12 students’ Computer Science projects"],
+    },
+    { name: "Priya N", role: "Systems", img: "https://placehold.co/254x240", slug: "priya-n" },
+    { name: "John Appleseed", role: "Architecture", img: "https://placehold.co/254x240", slug: "john-appleseed" },
+  ];
+
+  const state = {
+    // Global-ish app state
+    projects: Array.isArray(window.PROJECTS_CATALOG) ? window.PROJECTS_CATALOG : [],
+    // Home page
+    home: {
+      mounted: false,
+      showProposal: false,
+      showTerms: false,
+      leadersInView: false,
+      ctaInView: false,
+      activeLeader: 0,
+      isFading: false,
+      isPaused: false,
+      featuredProjects: [],
+      projectOfMonth: null,
+    },
+    // Projects page
+    projectsPage: {
+      mounted: false,
+      searchTerm: "",
+      previewingId: null,
+      showEmbeddedProject: false,
+      teamMembers: [...FALLBACK_MEMBERS],
+    },
+    // Learning hub
+    learning: {
+      currentDetail: null,
+      sections: null,
+      pathways: null,
+    },
+    // Chat
+    chat: { open: false },
+  };
+
+  // -----------------------------
+  // Utilities
+  // -----------------------------
+  function escapeHtml(s) {
+    return String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function toast(title, message, type = "success") {
+    const id = `t_${Math.random().toString(16).slice(2)}`;
+    const bg =
+      type === "success"
+        ? "bg-emerald-600"
+        : type === "error"
+        ? "bg-red-600"
+        : "bg-gray-800";
+    const html = `
+      <div id="${id}" class="w-[92vw] max-w-lg ${bg} text-white rounded-2xl shadow-lg px-4 py-3">
+        <div class="font-semibold" style="font-family:Poppins, ui-sans-serif">${escapeHtml(title)}</div>
+        <div class="text-sm opacity-90 mt-0.5" style="font-family:Poppins, ui-sans-serif">${escapeHtml(message)}</div>
+      </div>
+    `;
+    toastsEl.insertAdjacentHTML("beforeend", html);
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    }, 3200);
+  }
+
+  function applyEnterTextAnimations() {
+    if (!appEl) return;
+
+    const els = appEl.querySelectorAll("h1, h2, h3, p, li");
+    const max = 18;
+    for (let i = 0; i < els.length && i < max; i++) {
+      const el = els[i];
+      if (!el || el.classList.contains("enter-text") || el.classList.contains("enter-fade")) continue;
+      const isFadeOnly = !!el.closest('[data-enter="fade"]');
+      el.classList.add(isFadeOnly ? "enter-fade" : "enter-text");
+      const base = isFadeOnly ? 250 : 0;
+      const step = isFadeOnly ? 140 : 55;
+      el.style.setProperty("--enter-delay", `${base + Math.min(i * step, 880)}ms`);
+    }
+  }
+
+  function parseRoute() {
+    // Supported:
+    // #/               (home)
+    // #/projects
+    // #/projects/:id
+    // #/team
+    // #/team/:slug
+    // #/learning-hub
+    // #/contact
+    const raw = (location.hash || "#/").replace(/^#/, "");
+    const parts = raw.split("/").filter(Boolean);
+    const base = parts[0] || "";
+    const param = parts[1] || null;
+
+    if (!base) return { name: "home" };
+    if (base === "projects" && !param) return { name: "projects" };
+    if (base === "projects" && param) return { name: "projectDetail", id: param };
+    if (base === "team" && !param) return { name: "team" };
+    if (base === "team" && param) return { name: "teamMember", slug: param };
+    if (base === "learning-hub") return { name: "learning" };
+    if (base === "contact") return { name: "contact" };
+    return { name: "home" };
+  }
+
+  function getProjectById(id) {
+    return (Array.isArray(state.projects) ? state.projects : []).find((p) => String(p.id) === String(id)) || null;
+  }
+
+  function getGitHubOgImage(repoUrl) {
+    try {
+      const u = new URL(String(repoUrl || ""));
+      if (/github\.com$/i.test(u.hostname)) {
+        const parts = u.pathname.split("/").filter(Boolean);
+        if (parts.length < 2) return "";
+        const owner = parts[0];
+        const repo = parts[1].replace(/\.git$/i, "");
+        return `https://opengraph.githubassets.com/1/${owner}/${repo}`;
+      }
+      if (/\.github\.io$/i.test(u.hostname)) {
+        const owner = u.hostname.replace(/\.github\.io$/i, "");
+        const parts = u.pathname.split("/").filter(Boolean);
+        if (parts.length < 1) return "";
+        const repo = parts[0];
+        return `https://opengraph.githubassets.com/1/${owner}/${repo}`;
+      }
+      return "";
+    } catch {
+      return "";
+    }
+  }
+
+  function getProjectImage(project) {
+    if (!project) return "";
+    if (project.image) return project.image.replace(/^\//, ""); // allow "/gitlogos/x.png" -> "gitlogos/x.png"
+    if (project.repoUrl) return getGitHubOgImage(project.repoUrl);
+    return "";
+  }
+
+  function formatModulesValue(modulesValue) {
+    if (!modulesValue) return "";
+    if (typeof modulesValue === "string") return modulesValue;
+    if (Array.isArray(modulesValue)) return modulesValue.filter(Boolean).join("\n");
+    if (typeof modulesValue === "object") {
+      return Object.entries(modulesValue)
+        .map(([name, moduleData]) => {
+          const desc = moduleData && typeof moduleData === "object" ? moduleData.description || "" : "";
+          const components =
+            moduleData && typeof moduleData === "object" && Array.isArray(moduleData.components)
+              ? moduleData.components.filter(Boolean)
+              : [];
+          const line1 = desc ? `${name}: ${desc}` : `${name}`;
+          if (components.length === 0) return line1;
+          return `${line1}\n- ${components.join("\n- ")}`;
+        })
+        .filter(Boolean)
+        .join("\n\n");
+    }
+    return "";
+  }
+
+  function loadTeamMembers() {
+    try {
+      const raw = localStorage.getItem(TEAM_STORAGE_KEY);
+      const stored = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(stored) && stored.length > 0) {
+        const adminMembers = stored
+          .map((m) => ({
+            name: m.name,
+            role: m.role || "",
+            img: m.avatar || "https://placehold.co/254x240",
+            slug: m.slug || "",
+            bio: m.bio || "",
+          }))
+          .filter((m) => m.slug);
+
+        if (adminMembers.length > 0) {
+          const bySlug = new Map(FALLBACK_MEMBERS.map((m) => [m.slug, m]));
+          adminMembers.forEach((m) => bySlug.set(m.slug, m));
+          state.projectsPage.teamMembers = Array.from(bySlug.values());
+          return;
+        }
+      }
+    } catch {}
+    state.projectsPage.teamMembers = [...FALLBACK_MEMBERS];
+  }
+
+  // -----------------------------
+  // Navbar + Chat bubble
+  // -----------------------------
+  function renderNavbar() {
+    const route = parseRoute();
+    const active = (name) =>
+      (route.name === name || (name === "team" && route.name === "teamMember"))
+        ? "text-white bg-black"
+        : "text-black bg-white/40";
+
+    navbarEl.innerHTML = `
+      <nav class="w-full bg-white/70 backdrop-blur border-b border-black/5">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
+          <a href="#/" class="font-semibold text-black" style="font-family:Poppins, ui-sans-serif">
+            Digital Twins Hub
+          </a>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <a href="#/" class="px-4 py-2 rounded-full shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)] ${active("home")}" style="font-family:Poppins, ui-sans-serif">
+              Home
+            </a>
+            <a href="#/projects" class="px-4 py-2 rounded-full shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)] ${active("projects")}" style="font-family:Poppins, ui-sans-serif">
+              Projects
+            </a>
+            <a href="#/learning-hub" class="px-4 py-2 rounded-full shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)] ${active("learning")}" style="font-family:Poppins, ui-sans-serif">
+              Learning Hub
+            </a>
+            <a href="#/team" class="px-4 py-2 rounded-full shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)] ${active("team")}" style="font-family:Poppins, ui-sans-serif">
+              Team
+            </a>
+            <a href="#/contact" class="px-4 py-2 rounded-full shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)] ${active("contact")}" style="font-family:Poppins, ui-sans-serif">
+              Contact
+            </a>
+          </div>
+        </div>
+      </nav>
+    `;
+  }
+
+  function renderChatAssistant() {
+    chatEl.innerHTML = `
+      <button id="chatBtn"
+        class="fixed bottom-6 right-6 z-[9999] rounded-full bg-black text-white px-5 py-3 shadow-lg hover:bg-gray-900"
+        style="font-family:Poppins, ui-sans-serif">
+        Chat
+      </button>
+
+      <div id="chatModal" class="${state.chat.open ? "" : "hidden"} fixed inset-0 z-[9998]">
+        <div class="absolute inset-0 bg-black/60"></div>
+        <div class="absolute bottom-24 right-6 w-[92vw] max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div class="px-4 py-3 border-b flex items-center justify-between">
+            <div class="font-semibold" style="font-family:Poppins, ui-sans-serif">Chat Assistant</div>
+            <button id="chatClose" class="px-2 py-1 text-gray-600 hover:text-black">✕</button>
+          </div>
+          <div class="p-4 text-sm text-gray-700" style="font-family:Poppins, ui-sans-serif">
+            This is a lightweight placeholder for your React ChatAssistant component.
+            <div class="mt-2 text-gray-500">Wire your assistant logic here when ready.</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const btn = document.getElementById("chatBtn");
+    const close = document.getElementById("chatClose");
+    const modal = document.getElementById("chatModal");
+
+    btn?.addEventListener("click", () => {
+      state.chat.open = true;
+      renderChatAssistant();
+    });
+    close?.addEventListener("click", () => {
+      state.chat.open = false;
+      renderChatAssistant();
+    });
+    modal?.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        state.chat.open = false;
+        renderChatAssistant();
+      }
+    });
+  }
+
+  // -----------------------------
+  // Home Page (DigitalTwinsHub)
+  // -----------------------------
+  function initHomeData() {
+    const catalog = Array.isArray(state.projects) ? state.projects : [];
+    const shuffled = [...catalog].sort(() => Math.random() - 0.5);
+
+    const flagship = shuffled.filter((p) => p && p.projectType === "flagship");
+    const sourceForFeatured = flagship.length > 0 ? flagship : shuffled;
+    state.home.featuredProjects = sourceForFeatured.slice(0, Math.min(3, sourceForFeatured.length));
+    state.home.projectOfMonth = shuffled[0] || null;
+  }
+
+  function homeLeaders() {
+    return [
+      {
+        name: "Professor Marcela Oliva",
+        title: "Project Leader",
+        img: "Professors/Professor Marcela Oliva.jpg",
+        desc:
+          "For over a decade, she led as the Knowledge Architect for the $9 billion Building Program at the Los Angeles Community College District, pioneering the development and rollout of the nation’s largest Digital Twin/Virtualization BIM/GIS System, aligned with National Intelligence Standards."
+      },
+      {
+        name: "Professor Arthur Modine",
+        title: "Project Leader",
+        img: "Professors/Professor Arthur Modine.png",
+        desc:
+          "Arthur is a designer and entrepreneur based in Los Angeles, California, specializing in architecture, software development and fashion design. He holds a Master's in Architecture from SCI-Arc, where was honored with a master's thesis award for developing a prototype of AURA, an innovative AR-based urban planning and geospatial analysis platform."
+      },
+      {
+        name: "Professor Jack Rendler",
+        title: "Project Leader",
+        img: "Professors/Professor Jack Rendler.jpg",
+        desc:
+          "Jack Oliva-Rendler is a designer and researcher exploring digital 3D modeling, GIS, and algorithmic systems for multi-scalar ecological and infrastructural solutions. He studied at SCI-Arc and earned a Master of Architecture from Harvard GSD."
+      },
+    ];
+  }
+
+  function renderHome() {
+    const leaders = homeLeaders();
+    const featured = state.home.featuredProjects.length
+      ? state.home.featuredProjects
+      : [
+          { id: "sample-1", title: "Campus Microgrid Digital Twin", category: "Energy · Simulation", goal: "Real-time energy monitoring and scenario testing for a multi-building campus microgrid." },
+          { id: "sample-2", title: "Transit Accessibility Twin", category: "Mobility · GIS", goal: "GIS-based twin exploring access to public transit stops by walking, biking, and micro-mobility." },
+          { id: "sample-3", title: "Manufacturing Line XR Prototype", category: "XR · Industrial", goal: "A 3D twin of a factory line with AR overlays for training and maintenance." },
+        ];
+
+    const pom = state.home.projectOfMonth;
+
+    const savedProjects = Array.isArray(state.projects) ? state.projects : [];
+    const showcase = savedProjects.length
+      ? [...savedProjects].sort(() => Math.random() - 0.5).slice(0, 3)
+      : [
+          { title: "Smart Campus Energy Model", img: "https://placehold.co/640x420", category: "Energy" },
+          { title: "Urban Mobility Twin", img: "https://placehold.co/640x420", category: "Transportation" },
+          { title: "Manufacturing Line Simulator", img: "https://placehold.co/640x420", category: "Manufacturing" },
+        ];
+
+    const active = state.home.activeLeader;
+
+    appEl.innerHTML = `
+      <div class="flex flex-col transition-all duration-500 ease-out opacity-100 translate-y-0">
+
+        <!-- Hero Section -->
+        <section class="w-full bg-gray-950 relative overflow-hidden">
+          <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.22),_transparent_60%)]"></div>
+          <div class="relative max-w-7xl mx-auto px-6 py-16 md:py-24">
+            <div class="w-full max-w-4xl mx-auto" data-enter="fade">
+              <h1 class="text-white leading-tight text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-center"
+                style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-weight:500; line-height:1.1">
+                Digital Twins Projects Hub
+              </h1>
+
+              <p class="mt-6 text-slate-200/90 text-lg md:text-xl leading-relaxed text-justify"
+                style="font-family:Poppins, ui-sans-serif, system-ui">
+                This platform is a collaborative space where innovators, researchers, and students can create, showcase, and track projects from any discipline...
+              </p>
+
+              <div class="mt-6 h-px w-full bg-gradient-to-r from-transparent via-slate-600/50 to-transparent"></div>
+
+              <ul class="mt-6 space-y-2 text-slate-100 text-base md:text-lg text-left md:text-justify"
+                style="font-family:Poppins, ui-sans-serif, system-ui">
+                <li><span class="font-semibold">Collaboration Across Teams:</span> Work with professors, peers, and contributors from anywhere.</li>
+                <li><span class="font-semibold">Dynamic Project Tracking:</span> Monitor progress, stages, and milestones visually.</li>
+                <li><span class="font-semibold">Cross-Disciplinary Projects:</span> Combine software, data, design, and physical systems in one space.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Featured + Project of Month -->
+        <section class="w-full bg-gray-950 text-white">
+          <div class="max-w-7xl mx-auto px-6 py-16 md:py-24 grid gap-12 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)] items-start">
+            <div>
+              <h3 class="text-3xl md:text-4xl font-semibold" style="font-family:Poppins, ui-sans-serif">FLAGSHIP PROJECTS</h3>
+              <p class="mt-3 text-white/70 max-w-xl text-base md:text-lg" style="font-family:Poppins, ui-sans-serif, system-ui">
+                A rotating look at digital twin projects pulled from the Projects hub.
+              </p>
+
+              <div class="mt-8 space-y-6">
+                ${featured
+                  .map((project, index) => {
+                    const pid = project.id ? String(project.id) : "";
+                    return `
+                      <div class="group rounded-2xl bg-white/5 border border-white/10 p-5 md:p-6 flex flex-col gap-3 hover:bg-white/10 transition-colors">
+                        <div class="flex items-center justify-between gap-3">
+                          <h4 class="text-lg md:text-xl font-semibold" style="font-family:Poppins, ui-sans-serif">
+                            ${escapeHtml(project.title || "Untitled Project")}
+                          </h4>
+                          <span class="inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-white/10 text-white/80"
+                            style="font-family:Poppins, ui-sans-serif">
+                            ${escapeHtml(project.category || "Digital Twin Project")}
+                          </span>
+                        </div>
+
+                        <p class="text-sm md:text-base text-white/70" style="font-family:Poppins, ui-sans-serif, system-ui">
+                          ${escapeHtml(project.summary || project.goal || "A featured project from the Digital Twins hub.")}
+                        </p>
+
+                        <div class="mt-2 flex items-center justify-between gap-3 text-sm text-white/70">
+                          ${
+                            pid
+                              ? `<a href="#/projects?id=${encodeURIComponent(pid)}" class="underline-offset-4 hover:underline">View project</a>`
+                              : `<span>From the fellowship projects</span>`
+                          }
+                          <div class="flex items-center gap-1">
+                            ${[0, 1, 2]
+                              .map((dot) => `<span class="h-1.5 w-1.5 rounded-full ${dot === index ? "bg-white" : "bg-white/30"}"></span>`)
+                              .join("")}
+                          </div>
+                        </div>
+                      </div>
+                    `;
+                  })
+                  .join("")}
+              </div>
+            </div>
+
+            <div class="rounded-3xl bg-white text-gray-900 overflow-hidden shadow-lg border border-gray-200">
+              <div class="px-6 pt-6 pb-4 border-b border-gray-200 flex items-center justify-between">
+                <div>
+                  <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500" style="font-family:Poppins, ui-sans-serif">Project of the Month</h3>
+                  <p class="text-lg md:text-xl font-semibold mt-1" style="font-family:Poppins, ui-sans-serif">
+                    ${escapeHtml((pom && pom.title) || "LA River Climate Resilience Twin")}
+                  </p>
+                </div>
+                <span class="inline-flex items-center rounded-full bg-gray-900 text-white text-xs px-3 py-1" style="font-family:Poppins, ui-sans-serif">
+                  ${escapeHtml((pom && pom.category) || "Climate · GIS · 3D")}
+                </span>
+              </div>
+
+              <div class="aspect-video bg-black">
+                <video class="w-full h-full" controls autoplay loop muted playsinline
+                  src="${escapeHtml((pom && pom.videoUrl) || "Featured Projects/Mastering Agile Sprints_ A Manager's Guide.mp4")}">
+                </video>
+              </div>
+
+              <div class="px-6 py-5 space-y-3 text-sm md:text-base" style="font-family:Poppins, ui-sans-serif, system-ui">
+                <p class="text-gray-700">
+                  ${escapeHtml((pom && (pom.summary || pom.goal)) || "An interactive twin combining 3D models, simulations, and community data to explore future scenarios.")}
+                </p>
+                <p class="text-gray-600 text-sm">
+                  ${escapeHtml((pom && pom.tools) ? `Built with: ${pom.tools}` : "Built with: Unreal Engine, Rhino, QGIS, open datasets.")}
+                </p>
+                <button class="mt-1 inline-flex items-center text-sm font-medium text-gray-900 hover:text-black underline-offset-4 hover:underline">
+                  View project overview
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Projects Showcase -->
+        <section class="w-full bg-gray-300">
+          <div class="max-w-[90rem] mx-auto px-6 py-16 md:py-24">
+            <div class="flex flex-col items-center text-center">
+              <h3 class="text-black text-4xl sm:text-5xl md:text-6xl" style="font-family:Poppins, ui-sans-serif">Projects</h3>
+              <p class="mt-4 text-black/70 max-w-2xl text-base md:text-lg" style="font-family:Poppins, ui-sans-serif, system-ui">
+                Explore featured digital twin initiatives across disciplines. Dive into simulations, analytics, and real-time models.
+              </p>
+            </div>
+
+            <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              ${showcase
+                .map((p, i) => {
+                  const img = (p.image || p.img || "https://placehold.co/640x420").replace(/^\//, "");
+                  const id = p.id ? String(p.id) : "";
+                  return `
+                    <div class="group rounded-2xl bg-white/60 backdrop-blur-sm border border-black/5 overflow-hidden shadow-sm">
+                      <div class="relative overflow-hidden">
+                        <img src="${escapeHtml(img)}" alt="${escapeHtml(p.title || "Project preview")}" class="w-full h-56 object-cover" />
+                        <span class="absolute top-3 left-3 rounded-full bg-black/80 text-white text-xs px-3 py-1" style="font-family:Poppins, ui-sans-serif">
+                          ${escapeHtml(p.category || "Project")}
+                        </span>
+                      </div>
+                      <div class="p-5">
+                        <h4 class="text-lg font-semibold text-black" style="font-family:Poppins, ui-sans-serif">${escapeHtml(p.title || "Untitled Project")}</h4>
+                        ${
+                          p.summary || p.goal
+                            ? `<p class="mt-2 text-sm text-black/70 line-clamp-2" style="font-family:Poppins, ui-sans-serif, system-ui">
+                                ${escapeHtml(p.summary || String(p.goal).split("\n")[0])}
+                              </p>`
+                            : ""
+                        }
+                        <a href="${id ? `#/projects/${encodeURIComponent(id)}` : "#/projects"}"
+                           class="mt-4 inline-flex items-center text-sm text-black/70 group-hover:text-black underline-offset-4 hover:underline"
+                           style="font-family:Poppins, ui-sans-serif">
+                          View details
+                        </a>
+                      </div>
+                    </div>
+                  `;
+                })
+                .join("")}
+            </div>
+
+            <div class="mt-10 flex justify-center">
+              <a href="#/projects">
+                <button class="rounded-full bg-black text-white px-6 py-3 hover:bg-gray-900 transition-colors text-base" style="font-family:Poppins, ui-sans-serif, system-ui">
+                  Explore All Projects
+                </button>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Project Leaders -->
+        <section class="w-full bg-black text-white relative overflow-hidden">
+          <div class="max-w-[90rem] mx-auto px-6 py-20 md:py-24 relative">
+            <div class="grid grid-cols-1 lg:grid-cols-[520px_1fr] gap-10 items-start">
+              <div>
+                <div class="text-white" style="font-family:Poppins, ui-sans-serif; font-weight:500; font-size:88px; line-height:1.05">
+                  Project <br /> Leaders
+                </div>
+                <p class="mt-6 text-white/70 max-w-none text-xl md:text-2xl" style="font-family:Poppins, ui-sans-serif, system-ui; text-align:justify">
+                  Our fellowship members lead with expertise, creativity, and collaboration. They turn ideas into reality and inspire innovation across every project.
+                </p>
+              </div>
+
+              <div class="relative">
+                <div id="leaderSlider"
+                  class="relative bg-white/10 rounded-3xl border border-white/20 backdrop-blur-sm shadow-[inset_0_1px_6px_rgba(255,255,255,0.6)] px-6 py-6 md:px-10 md:py-10 overflow-hidden"
+                  tabindex="0"
+                  aria-label="Project leaders slider">
+                  <div id="leaderContent" class="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8 items-start transition-opacity duration-[${LEADER_FADE_MS}ms] ease-in-out opacity-100">
+                    <img
+                      id="leaderImg"
+                      src="${escapeHtml(leaders[active].img)}"
+                      alt="${escapeHtml(leaders[active].name)}"
+                      class="w-full md:w-[260px] h-[340px] object-cover rounded-2xl"
+                      onerror="this.src='https://placehold.co/260x340'; this.onerror=null;"
+                    />
+                    <div class="pt-2">
+                      <div id="leaderName" class="text-3xl md:text-4xl font-bold" style="font-family:Poppins, ui-sans-serif">
+                        ${escapeHtml(leaders[active].name)}
+                      </div>
+                      <div id="leaderTitle" class="mt-2 text-white/60" style="font-family:Poppins, ui-sans-serif">
+                        ${escapeHtml(leaders[active].title)}
+                      </div>
+                      <p id="leaderDesc" class="mt-6 text-white/80 max-w-xl" style="font-family:Poppins, ui-sans-serif">
+                        ${escapeHtml(leaders[active].desc || "Digital Twin leadership and mentorship across disciplines.")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="mt-6 flex items-center gap-2 justify-center">
+                    ${leaders
+                      .map(
+                        (_, i) => `
+                        <button data-leader-dot="${i}" aria-label="Go to slide ${i + 1}"
+                          class="h-2 w-2 rounded-full ${i === active ? "bg-white" : "bg-white/40"} hover:bg-white/70 transition-colors">
+                        </button>
+                      `
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="w-full bg-gray-900 text-white">
+          <div class="max-w-7xl mx-auto px-6 py-12 md:py-16 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              <h3 class="text-2xl md:text-3xl" style="font-family:Inter, system-ui">Have a Digital Twin idea?</h3>
+              <p class="text-white/80 mt-2" style="font-family:Poppins, ui-sans-serif">
+                Propose a project and collaborate with mentors and peers.
+              </p>
+            </div>
+            <button id="openProposal"
+              class="rounded-full bg-white text-black px-6 py-3 hover:bg-gray-200 transition-colors"
+              style="font-family:Poppins, ui-sans-serif">
+              Submit a Proposal
+            </button>
+          </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="w-full bg-black text-white/70">
+          <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span class="text-sm" style="font-family:Poppins, ui-sans-serif">${new Date().getFullYear()} Digital Twins Hub</span>
+            <div class="flex items-center gap-6 text-sm">
+              <button id="openTerms1" type="button"
+                class="hover:text-white cursor-pointer bg-transparent border-none p-0 m-0 text-inherit"
+                style="font-family:Poppins, ui-sans-serif">
+                Privacy
+              </button>
+              <button id="openTerms2" type="button"
+                class="hover:text-white cursor-pointer bg-transparent border-none p-0 m-0 text-inherit"
+                style="font-family:Poppins, ui-sans-serif">
+                Terms
+              </button>
+              <a href="#/contact" class="hover:text-white">Contact</a>
+            </div>
+          </div>
+        </footer>
+
+        ${renderProposalModal()}
+        ${renderTermsModal()}
+      </div>
+    `;
+
+    // Slider behaviors
+    const slider = document.getElementById("leaderSlider");
+    slider?.addEventListener("mouseenter", () => (state.home.isPaused = true));
+    slider?.addEventListener("mouseleave", () => (state.home.isPaused = false));
+    slider?.addEventListener("focus", () => (state.home.isPaused = true));
+    slider?.addEventListener("blur", () => (state.home.isPaused = false));
+
+    document.querySelectorAll("[data-leader-dot]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const i = Number(btn.getAttribute("data-leader-dot"));
+        homeGoToLeader(i);
+      });
+    });
+
+    document.getElementById("openProposal")?.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => {
+        state.home.showProposal = true;
+        render();
+      }, 300);
+    });
+
+    document.getElementById("openTerms1")?.addEventListener("click", () => {
+      state.home.showTerms = true;
+      render();
+    });
+    document.getElementById("openTerms2")?.addEventListener("click", () => {
+      state.home.showTerms = true;
+      render();
+    });
+
+    // Modal close handlers
+    document.getElementById("closeProposal")?.addEventListener("click", () => {
+      state.home.showProposal = false;
+      render();
+    });
+    document.getElementById("proposalBackdrop")?.addEventListener("click", () => {
+      state.home.showProposal = false;
+      render();
+    });
+
+    document.getElementById("closeTerms")?.addEventListener("click", () => {
+      state.home.showTerms = false;
+      render();
+    });
+    document.getElementById("termsBackdrop")?.addEventListener("click", () => {
+      state.home.showTerms = false;
+      render();
+    });
+  }
+
+  let leaderTransitionTimeout = null;
+  function setLeaderDotActive(index) {
+    document.querySelectorAll("[data-leader-dot]").forEach((btn) => {
+      const i = Number(btn.getAttribute("data-leader-dot"));
+      btn.classList.toggle("bg-white", i === index);
+      btn.classList.toggle("bg-white/40", i !== index);
+    });
+  }
+
+  function updateLeaderSliderDom(index) {
+    const leaders = homeLeaders();
+    const leader = leaders[index];
+    if (!leader) return;
+
+    const img = document.getElementById("leaderImg");
+    const nameEl = document.getElementById("leaderName");
+    const titleEl = document.getElementById("leaderTitle");
+    const descEl = document.getElementById("leaderDesc");
+
+    if (img) {
+      img.src = String(leader.img || "");
+      img.alt = String(leader.name || "");
+    }
+    if (nameEl) nameEl.textContent = String(leader.name || "");
+    if (titleEl) titleEl.textContent = String(leader.title || "");
+    if (descEl) descEl.textContent = String(leader.desc || "Digital Twin leadership and mentorship across disciplines.");
+
+    setLeaderDotActive(index);
+  }
+
+  const leaderImgPreloadCache = new Map();
+  function preloadLeaderImg(src) {
+    const key = String(src || "");
+    if (!key) return Promise.resolve();
+    if (leaderImgPreloadCache.has(key)) return leaderImgPreloadCache.get(key);
+
+    const p = new Promise((resolve) => {
+      const im = new Image();
+      im.onload = () => resolve();
+      im.onerror = () => resolve();
+      im.src = key;
+    });
+    leaderImgPreloadCache.set(key, p);
+    return p;
+  }
+
+  function startLeaderTransition(nextIndexOrFn) {
+    if (state.home.isFading) return;
+
+    const leaderContent = document.getElementById("leaderContent");
+    if (!leaderContent) return;
+
+    if (leaderTransitionTimeout) {
+      clearTimeout(leaderTransitionTimeout);
+      leaderTransitionTimeout = null;
+    }
+
+    state.home.isFading = true;
+    leaderContent.classList.remove("opacity-100");
+    leaderContent.classList.add("opacity-0");
+
+    leaderTransitionTimeout = setTimeout(() => {
+      const leaders = homeLeaders();
+      const nextIndex =
+        typeof nextIndexOrFn === "function" ? Number(nextIndexOrFn()) : Number(nextIndexOrFn);
+      const safeIndex = Number.isFinite(nextIndex) ? ((nextIndex % leaders.length) + leaders.length) % leaders.length : 0;
+
+      const nextLeader = leaders[safeIndex];
+      const nextImg = nextLeader && nextLeader.img ? String(nextLeader.img) : "";
+
+      const maxWait = new Promise((r) => setTimeout(r, 450));
+      Promise.race([preloadLeaderImg(nextImg), maxWait]).then(() => {
+        state.home.activeLeader = safeIndex;
+        updateLeaderSliderDom(safeIndex);
+
+        requestAnimationFrame(() => {
+          leaderContent.classList.remove("opacity-0");
+          leaderContent.classList.add("opacity-100");
+        });
+
+        state.home.isFading = false;
+        leaderTransitionTimeout = null;
+      });
+    }, LEADER_FADE_MS);
+  }
+
+  function homeGoToLeader(index) {
+    startLeaderTransition(index);
+  }
+
+  function homeNextLeader() {
+    startLeaderTransition(() => {
+      const leaders = homeLeaders();
+      return (state.home.activeLeader + 1) % leaders.length;
+    });
+  }
+
+  let homeInterval = null;
+  function ensureHomeInterval() {
+    if (homeInterval) clearInterval(homeInterval);
+    homeInterval = setInterval(() => {
+      const route = parseRoute();
+      if (route.name !== "home") return;
+      if (state.home.isPaused) return;
+      if (state.home.isFading) return;
+      homeNextLeader();
+    }, LEADER_INTERVAL_MS);
+  }
+
+  function renderProposalModal() {
+    if (!state.home.showProposal) return "";
+    return `
+      <div class="fixed inset-0 z-50 flex items-start justify-center pt-16 md:pt-20">
+        <div id="proposalBackdrop" class="absolute inset-0 bg-black/60"></div>
+        <div class="relative z-10 max-w-xl w-[90vw]">
+          <div class="absolute -top-10 right-0 flex items-center gap-3">
+            <button id="closeProposal" type="button"
+              class="text-sm text-white/80 hover:text-white underline underline-offset-4"
+              style="font-family:Poppins, ui-sans-serif">
+              Close
+            </button>
+          </div>
+
+          <div class="max-w-xl mx-auto bg-white p-8 rounded-2xl shadow-md" style="font-family:Poppins, ui-sans-serif">
+            <h2 class="text-2xl font-semibold mb-6 text-gray-800">Submit a Proposal</h2>
+
+            <form class="space-y-5" onsubmit="return false">
+              ${renderInput("Project Title", "Enter your project title")}
+              ${renderSelect()}
+              ${renderTextarea("Project Description", "Describe your idea...")}
+              ${renderFileUpload()}
+              <button type="button" class="rounded-full bg-black text-white px-6 py-3 w-full hover:bg-gray-800 transition-colors">
+                Submit Proposal
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderTermsModal() {
+    if (!state.home.showTerms) return "";
+    return `
+      <div class="fixed inset-0 z-50 flex items-start justify-center pt-10 md:pt-16">
+        <div id="termsBackdrop" class="absolute inset-0 bg-black/60"></div>
+        <div class="relative z-10 max-w-3xl w-[92vw]">
+          <div class="absolute -top-10 right-0 flex items-center gap-3">
+            <button id="closeTerms" type="button"
+              class="text-sm text-white/80 hover:text-white underline underline-offset-4"
+              style="font-family:Poppins, ui-sans-serif">
+              Close
+            </button>
+          </div>
+
+          <div class="bg-white rounded-2xl shadow-md px-6 py-8 md:px-8 md:py-10">
+            <h2 class="text-2xl md:text-3xl font-semibold text-gray-900" style="font-family:Poppins, ui-sans-serif">
+              Digital Twins Projects Hub — Terms of Service
+            </h2>
+            <p class="mt-2 text-sm text-gray-500" style="font-family:Poppins, ui-sans-serif">
+              Effective date: November 24, 2025
+            </p>
+
+            <div class="mt-6 space-y-4 text-gray-800 text-sm md:text-base" style="font-family:Poppins, ui-sans-serif">
+              <p>
+                Welcome to <strong>Digital Twins Projects Hub</strong> ("we", "us", "Platform"). These Terms explain the rules for using our platform...
+              </p>
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-1">1. Membership</h3>
+                <p>The Platform is only for fellowship members. Only invited or approved members may register and access projects.</p>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-1">2. Account &amp; Security</h3>
+                <p>Keep your account details private. You are responsible for all activity under your account.</p>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-1">3. User Content</h3>
+                <p>Members can upload project ideas, code, 3D models, or other materials ("User Content"). You still own your work.</p>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-1">4. Acceptable Use</h3>
+                <p>Do not post illegal, harmful, or offensive content. Do not interfere with the Platform’s operation.</p>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-900 mb-1">9. Contact</h3>
+                <p>Questions? Email us at <strong>support@digitaltwins.example</strong>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderInput(label, placeholder) {
+    return `
+      <div>
+        <label class="block text-gray-700 mb-1 font-medium">${escapeHtml(label)}</label>
+        <input class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-black outline-none"
+          placeholder="${escapeHtml(placeholder)}" />
+      </div>
+    `;
+  }
+
+  function renderTextarea(label, placeholder) {
+    return `
+      <div>
+        <label class="block text-gray-700 mb-1 font-medium">${escapeHtml(label)}</label>
+        <textarea rows="4"
+          class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-black outline-none"
+          placeholder="${escapeHtml(placeholder)}"></textarea>
+      </div>
+    `;
+  }
+
+  function renderSelect() {
+    return `
+      <div>
+        <label class="block text-gray-700 mb-1 font-medium">Category</label>
+        <select class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-black outline-none">
+          <option>Select a category</option>
+          <option>AI / Machine Learning</option>
+          <option>Software Development</option>
+          <option>3D / Architecture</option>
+          <option>Data Science</option>
+          <option>Research Study</option>
+        </select>
+      </div>
+    `;
+  }
+
+  function renderFileUpload() {
+    return `
+      <div>
+        <label class="block text-gray-700 mb-1 font-medium">Attach Files (optional)</label>
+        <input type="file" class="w-full rounded-xl border border-gray-300 px-4 py-2" />
+      </div>
+    `;
+  }
+
+  // -----------------------------
+  // Projects Page
+  // -----------------------------
+  function exportPDF(proj) {
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "p", unit: "pt", format: "a4" });
+
+      const marginX = 40;
+      const marginTop = 40;
+      const lineHeight = 16;
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const textWidth = pageWidth - marginX * 2;
+      let y = marginTop;
+
+      const addWrappedText = (text, options = {}) => {
+        const { bold = false } = options;
+        const content = text || "-";
+        if (bold) doc.setFont(undefined, "bold");
+        const lines = doc.splitTextToSize(content, textWidth);
+        doc.text(lines, marginX, y);
+        y += lines.length * lineHeight + 6;
+        if (bold) doc.setFont(undefined, "normal");
+      };
+
+      const addSection = (label, value, mono = false) => {
+        doc.setFontSize(11);
+        doc.setFont(undefined, "bold");
+        doc.text(String(label || "").toUpperCase(), marginX, y);
+        doc.setFont(undefined, "normal");
+        y += lineHeight;
+
+        if (mono) doc.setFont("courier", "normal");
+        doc.setFontSize(10);
+        const text = value || "-";
+        const lines = doc.splitTextToSize(text, textWidth);
+        doc.text(lines, marginX, y);
+        y += lines.length * lineHeight + 10;
+        if (mono) doc.setFont("helvetica", "normal");
+      };
+
+      doc.setFontSize(18);
+      doc.setFont(undefined, "bold");
+      addWrappedText(proj.title || "Untitled Project");
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, "normal");
+      const metaParts = [proj.category || "", proj.owner || "", proj.status || ""].filter(Boolean);
+      if (metaParts.length) addWrappedText(metaParts.join(" • "));
+
+      if (proj.teamMemberFirstName) {
+        let teamLine = `Team Member: ${proj.teamMemberFirstName} ${proj.teamMemberLastName || ""}`;
+        if (proj.teamMemberRole) teamLine += ` • ${proj.teamMemberRole}`;
+        addWrappedText(teamLine);
+        if (proj.teamMemberDescription) addWrappedText(proj.teamMemberDescription);
+      }
+
+      y += 4;
+
+      addSection("Goal", proj.goal);
+      addSection("Structure & Capabilities", proj.structureCapabilities);
+      addSection("Key Features", proj.keyFeatures);
+      addSection("File Structure", proj.fileStructure, true);
+      addSection("Modules", formatModulesValue(proj.modules));
+      addSection("Module Functions", proj.moduleFunctions);
+      addSection("Impact & Data", proj.impactData);
+      addSection("Problem it Solves", proj.problem);
+      addSection("Data Types", proj.dataTypes);
+      addSection("Conclusion", proj.conclusion);
+
+      doc.setFontSize(9);
+      doc.setFont(undefined, "normal");
+      doc.text(`Generated ${new Date().toLocaleString()}`, marginX, doc.internal.pageSize.getHeight() - marginTop);
+
+      const safeTitle = (proj.title || "project").replace(/[^a-z0-9-]+/gi, "_");
+      doc.save(`${safeTitle}.pdf`);
+
+      toast("PDF Downloaded", `Proposal for "${proj.title || "Untitled Project"}" has been downloaded as a PDF.`, "success");
+    } catch (e) {
+      console.error("Export PDF error", e);
+      toast("Export Failed", "There was a problem generating the PDF. Please check the console for details.", "error");
+      alert("Could not export PDF in the browser. Please try again or check console for details.");
+    }
+  }
+
+  function renderProjectsPage() {
+    const mountedClass = state.projectsPage.mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4";
+    const normalizedQuery = (state.projectsPage.searchTerm || "").trim().toLowerCase();
+
+    const projects = Array.isArray(state.projects) ? state.projects : [];
+    const filteredProjects = normalizedQuery
+      ? projects.filter((p) => ((p.title || "").toLowerCase().includes(normalizedQuery) || (p.goal || "").toLowerCase().includes(normalizedQuery)))
+      : projects;
+
+    const flagship = filteredProjects.filter((p) => p.projectType === "flagship");
+    const userProjects = filteredProjects.filter((p) => !p.projectType || p.projectType === "user");
+
+    const members = Array.isArray(state.projectsPage.teamMembers) ? state.projectsPage.teamMembers : [];
+    const filteredMembers = normalizedQuery
+      ? members.filter((m) => ((m.name || "").toLowerCase().includes(normalizedQuery) || (m.role || "").toLowerCase().includes(normalizedQuery)))
+      : [];
+
+    const previewing = state.projectsPage.previewingId ? getProjectById(state.projectsPage.previewingId) : null;
+
+    appEl.innerHTML = `
+      <div class="min-h-screen bg-[#DFDFDF] transition-all duration-500 ease-out ${mountedClass}">
+        <div class="max-w-7xl mx-auto px-6 py-10 relative">
+          <h1 class="text-black text-4xl sm:text-5xl md:text-7xl"
+              style="font-family:Taygiacs, Poppins, ui-sans-serif; font-weight:400; line-height:1">
+            Projects
+          </h1>
+
+          <div class="mt-6 flex items-start justify-between gap-4">
+            <div class="flex-1">
+              <div class="flex items-center w-full max-w-md bg-white/40 rounded-full shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)] px-5 py-3">
+                <input id="projectsSearch" type="text" placeholder="Search projects & people"
+                  class="bg-transparent placeholder-black/60 text-black w-full focus:outline-none"
+                  style="font-family:Poppins, ui-sans-serif; font-size:18px"
+                  value="${escapeHtml(state.projectsPage.searchTerm)}" />
+              </div>
+
+              ${
+                normalizedQuery
+                  ? `
+                  <div class="mt-4 bg-white/70 rounded-2xl px-5 py-4 shadow-sm border border-black/5 max-w-md">
+                    <div class="text-xs font-semibold tracking-wide uppercase text-black/70" style="font-family:Poppins, ui-sans-serif">
+                      People
+                    </div>
+                    ${
+                      filteredMembers.length === 0
+                        ? `<div class="mt-2 text-xs text-black/60" style="font-family:Poppins, ui-sans-serif">No team members found.</div>`
+                        : `
+                        <div class="mt-2 flex flex-wrap gap-3">
+                          ${filteredMembers
+                            .map(
+                              (m) => `
+                              <a href="#/team/${encodeURIComponent(m.slug)}"
+                                class="inline-flex items-center gap-2 rounded-full bg-black text-white px-3 py-1 text-xs hover:bg-black/90">
+                                <span class="inline-block h-6 w-6 rounded-full bg-white/20"></span>
+                                <span>${escapeHtml(m.name)}</span>
+                                ${m.role ? `<span class="text-white/70">• ${escapeHtml(m.role)}</span>` : ""}
+                              </a>
+                            `
+                            )
+                            .join("")}
+                        </div>
+                      `
+                    }
+                  </div>
+                `
+                  : ""
+              }
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
+              ${
+                flagship.length
+                  ? `
+                    <div class="col-span-full mb-4">
+                      <div class="text-3xl font-semibold tracking-wide text-black" style="font-family:Poppins, ui-sans-serif">
+                        FLAGSHIP PROJECTS
+                      </div>
+                    </div>
+                    ${flagship.map(renderProjectCard).join("")}
+                  `
+                  : ""
+              }
+
+              ${
+                userProjects.length
+                  ? `
+                    <div class="col-span-full mt-10 mb-4">
+                      <div class="text-3xl font-semibold tracking-wide text-black" style="font-family:Poppins, ui-sans-serif">
+                        USER ADDED PROJECTS
+                      </div>
+                    </div>
+                    ${userProjects.map(renderProjectCard).join("")}
+                  `
+                  : ""
+              }
+
+              ${
+                flagship.length === 0 && userProjects.length === 0
+                  ? `<div class="mt-4 text-xs text-black/60 col-span-full" style="font-family:Poppins, ui-sans-serif">No user added projects yet.</div>`
+                  : ""
+              }
+            </div>
+          </div>
+        </div>
+
+        ${previewing ? renderProjectPreviewModal(previewing) : ""}
+      </div>
+    `;
+
+    // Wire search input
+    const search = document.getElementById("projectsSearch");
+    search?.addEventListener("input", (e) => {
+      state.projectsPage.searchTerm = e.target.value;
+      render();
+    });
+
+    // Wire cards
+    document.querySelectorAll("[data-open-preview]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const pid = el.getAttribute("data-open-preview");
+        if (!pid) return;
+        state.projectsPage.previewingId = pid;
+        state.projectsPage.showEmbeddedProject = false;
+        render();
+      });
+    });
+
+    // Modal buttons
+    document.getElementById("closePreview")?.addEventListener("click", () => {
+      state.projectsPage.previewingId = null;
+      render();
+    });
+    document.getElementById("previewBackdrop")?.addEventListener("click", () => {
+      state.projectsPage.previewingId = null;
+      render();
+    });
+    document.getElementById("exportPdfBtn")?.addEventListener("click", () => {
+      const p = state.projectsPage.previewingId ? getProjectById(state.projectsPage.previewingId) : null;
+      if (p) exportPDF(p);
+    });
+    document.getElementById("launchEmbedBtn")?.addEventListener("click", () => {
+      state.projectsPage.showEmbeddedProject = true;
+      render();
+    });
+
+    // Preserve preview scroll position
+    if (previewing) {
+      const key = `dt_preview_scroll_${previewing.id}`;
+      const modalScroll = document.getElementById("previewScroll");
+      if (modalScroll) {
+        modalScroll.scrollTop = Number(localStorage.getItem(key) || 0);
+        modalScroll.addEventListener("scroll", () => {
+          localStorage.setItem(key, String(modalScroll.scrollTop));
+        });
+      }
+    }
+
+    // If URL has ?id=, open it once
+    const qs = new URLSearchParams(location.hash.split("?")[1] || "");
+    const qid = qs.get("id");
+    if (qid && !state.projectsPage.previewingId) {
+      const exists = getProjectById(qid);
+      if (exists) {
+        state.projectsPage.previewingId = qid;
+        state.projectsPage.showEmbeddedProject = false;
+        render();
+      }
+    }
+  }
+
+  function renderProjectCard(p) {
+    const img = getProjectImage(p);
+    return `
+      <div data-open-preview="${escapeHtml(String(p.id))}"
+        class="group relative rounded-2xl bg-white/60 backdrop-blur-sm overflow-hidden cursor-pointer transition-transform transition-shadow duration-300 hover:-translate-y-1 hover:shadow-xl"
+        style="box-shadow: inset 0 4px 6px rgba(255,255,255,0.6);">
+        <div class="h-44 w-full overflow-hidden bg-white/40 flex items-center justify-center text-black/50">
+          ${
+            img
+              ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(p.title || "project image")}" class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-105" />`
+              : "No image"
+          }
+        </div>
+        <div class="p-5">
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-2xl font-bold text-black" style="font-family: Istok Web, Poppins, ui-sans-serif">
+              ${escapeHtml(p.title || "Untitled")}
+            </div>
+          </div>
+          <div class="mt-1 text-sm text-black" style="font-family: Istok Web, Poppins, ui-sans-serif">
+            ${escapeHtml(p.category || "")}${p.owner ? ` • ${escapeHtml(p.owner)}` : ""}
+          </div>
+          ${
+            p.teamMemberFirstName
+              ? `<div class="mt-1 text-xs text-black/70" style="font-family: Istok Web, Poppins, ui-sans-serif">
+                  Team Member: ${escapeHtml(p.teamMemberFirstName)} ${escapeHtml(p.teamMemberLastName || "")}${p.teamMemberRole ? ` • ${escapeHtml(p.teamMemberRole)}` : ""}
+                </div>`
+              : ""
+          }
+          ${
+            p.repoUrl
+              ? `<div class="mt-2 flex flex-col gap-1 text-xs">
+                  <a href="${escapeHtml(p.repoUrl)}" target="_blank" rel="noreferrer"
+                    class="inline-flex items-center justify-center rounded-full bg-black text-white px-3 py-1 text-[11px] hover:bg-black/90"
+                    onclick="event.stopPropagation()">
+                    Open in Browser
+                  </a>
+                </div>`
+              : ""
+          }
+          <p class="mt-3 text-xs text-black" style="font-family: Istok Web, Poppins, ui-sans-serif">
+            ${escapeHtml(p.goal || "")}
+          </p>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderProjectPreviewModal(p) {
+    const img = getProjectImage(p);
+    const embed = state.projectsPage.showEmbeddedProject && p.repoUrl;
+
+    const previewSummary =
+      (p && p.summary ? String(p.summary) : "") || (p && p.description ? String(p.description).split("\n")[0] : "");
+    return `
+      <div class="fixed inset-0 z-50 flex items-center justify-center">
+        <div id="previewBackdrop" class="absolute inset-0 bg-black/60"></div>
+
+        <div id="previewScroll"
+          class="relative z-10 w-[98vw] max-w-7xl max-h-[95vh] bg-white rounded-2xl overflow-y-auto flex flex-col transform transition-transform duration-300 ease-out scale-100">
+
+          <div class="bg-white/95 backdrop-blur border-b border-black/10">
+            ${img ? `<div class="h-36 sm:h-44 lg:h-48 w-full overflow-hidden bg-black/5"><img src="${escapeHtml(img)}" class="w-full h-full object-cover" /></div>` : ""}
+
+            <div class="px-5 py-4 md:px-7 md:py-5 lg:px-8 lg:py-6">
+              <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-6">
+                <div class="min-w-0">
+                  <h3 class="text-2xl sm:text-3xl lg:text-4xl text-black font-semibold break-words" style="font-family:Poppins, ui-sans-serif">
+                    ${escapeHtml(p.title || "")}
+                  </h3>
+                  <div class="text-sm sm:text-base text-black/70 mt-1">
+                    ${escapeHtml(p.category || "")}${p.owner ? ` • ${escapeHtml(p.owner)}` : ""}
+                  </div>
+
+                  ${
+                    p.repoUrl
+                      ? `
+                      <div class="mt-2 flex flex-col sm:flex-row sm:items-center sm:gap-3 text-xs sm:text-sm">
+                        <a href="${escapeHtml(p.repoUrl)}" target="_blank" rel="noreferrer"
+                           class="inline-flex items-center justify-center rounded-full bg-black text-white px-3 py-1 text-[11px] sm:text-xs hover:bg-black/90">
+                          Open in Browser
+                        </a>
+                        <button id="launchEmbedBtn" type="button"
+                          class="mt-2 sm:mt-0 inline-flex items-center justify-center rounded-full bg-black text-white px-3 py-1 text-[11px] sm:text-xs hover:bg-black/90">
+                          Launch project
+                        </button>
+                      </div>
+                    `
+                      : ""
+                  }
+
+                  ${
+                    previewSummary
+                      ? `<div class="mt-2 text-xs sm:text-sm text-black/80 leading-relaxed">
+                          ${escapeHtml(previewSummary)}
+                        </div>`
+                      : ""
+                  }
+
+                  ${
+                    p.teamMemberFirstName
+                      ? `
+                      <div class="mt-3 text-sm sm:text-base text-black/80" style="font-family:Poppins, ui-sans-serif">
+                        <span class="font-semibold">Team Member:</span>
+                        ${escapeHtml(p.teamMemberFirstName)} ${escapeHtml(p.teamMemberLastName || "")}
+                        ${p.teamMemberRole ? ` • ${escapeHtml(p.teamMemberRole)}` : ""}
+                        ${
+                          p.teamMemberDescription
+                            ? `<div class="mt-2 text-xs sm:text-sm text-black/70 whitespace-pre-wrap leading-relaxed">${escapeHtml(p.teamMemberDescription)}</div>`
+                            : ""
+                        }
+                      </div>
+                    `
+                      : ""
+                  }
+                </div>
+
+                <div class="flex flex-shrink-0 items-center gap-2 md:gap-3 self-start">
+                  <button id="exportPdfBtn" class="rounded-full border border-black/15 px-3 py-1.5 text-xs sm:text-sm">Export PDF</button>
+                  <button id="closePreview" class="rounded-full border border-black/15 px-3 py-1.5 text-xs sm:text-sm">Back to Projects</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-5 pb-5 pt-4 md:px-7 md:pt-5 md:pb-6 lg:px-8 lg:pt-6 lg:pb-7">
+            <div class="mb-5 flex flex-wrap gap-2 text-[11px] sm:text-xs" style="font-family:Poppins, ui-sans-serif">
+              <span class="px-3 py-1 rounded-full bg-black/5 text-black/70 border border-black/10">Overview</span>
+              <span class="px-3 py-1 rounded-full bg-black/5 text-black/70 border border-black/10">Technical</span>
+              <span class="px-3 py-1 rounded-full bg-black/5 text-black/70 border border-black/10">Data</span>
+              <span class="px-3 py-1 rounded-full bg-black/5 text-black/70 border border-black/10">Impact</span>
+            </div>
+
+            <div class="columns-1 md:columns-2 [column-gap:1rem] md:[column-gap:1.5rem] text-sm sm:text-base text-black" style="font-family:Poppins, ui-sans-serif">
+              ${p.description ? previewCard("Overview", renderTextBlock(p.description)) : ""}
+              ${p.goal ? previewCard("Goal", renderTextBlock(p.goal)) : ""}
+              ${p.structureCapabilities ? previewCard("Structure & Capabilities", renderTextBlock(p.structureCapabilities)) : ""}
+
+              ${p.techStack ? previewCard("Technical Stack", renderTechStack(p.techStack)) : ""}
+              ${Array.isArray(p.features) && p.features.length ? previewCard("Key Features", renderFeatures(p.features)) : ""}
+
+              ${p.fileStructure ? previewCard("File Structure", `<div class=\"font-mono text-xs sm:text-sm\">${escapeHtml(p.fileStructure)}</div>`) : ""}
+              ${p.modules ? previewCard("Modules", renderModules(p.modules)) : ""}
+              ${p.moduleFunctions ? previewCard("Module Functions", renderTextBlock(p.moduleFunctions)) : ""}
+
+              ${p.problem ? previewCard("Problem it Solves", renderTextBlock(p.problem)) : ""}
+              ${p.impact ? previewCard("Impact", renderImpact(p.impact)) : ""}
+              ${p.data ? previewCard("Data", renderData(p.data)) : ""}
+              ${p.dataTypes ? previewCard("Data Types", renderTextBlock(p.dataTypes)) : ""}
+
+              ${Array.isArray(p.roadmap) && p.roadmap.length ? previewCard("Roadmap", renderRoadmap(p.roadmap)) : ""}
+              ${p.team ? previewCard("Team", renderTeam(p.team)) : ""}
+              ${p.conclusion ? previewCard("Conclusion", renderTextBlock(p.conclusion)) : ""}
+              ${p.health ? previewCard("Project Health", renderHealth(p.health)) : ""}
+            </div>
+
+            ${
+              embed
+                ? `
+                <div class="mt-8">
+                  <div class="mb-2 text-xs sm:text-sm text-black/70" style="font-family:Poppins, ui-sans-serif">
+                    Embedded project view
+                  </div>
+                  <div class="border border-black/10 rounded-xl overflow-hidden h-[400px] sm:h-[500px] bg-black/2">
+                    <iframe src="${escapeHtml(p.repoUrl)}" title="${escapeHtml(p.title || "Project")} view" class="w-full h-full border-0"></iframe>
+                  </div>
+                </div>
+              `
+                : ""
+            }
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function previewCard(title, bodyHtml) {
+    return `
+      <div class="bg-black/2 rounded-xl border border-black/5 p-4 break-inside-avoid mb-4">
+        <div class="text-sm sm:text-base font-semibold tracking-wide uppercase text-black/80">${escapeHtml(title)}</div>
+        <div class="mt-2 leading-relaxed">${bodyHtml || "-"}</div>
+      </div>
+    `;
+  }
+
+  function previewBlock(label, value, mono = false) {
+    return `
+      <div class="bg-black/2 rounded-xl border border-black/5 p-4">
+        <div class="text-sm sm:text-base font-semibold tracking-wide uppercase text-black/80">${escapeHtml(label)}</div>
+        <div class="mt-2 whitespace-pre-wrap leading-relaxed ${mono ? "font-mono text-xs sm:text-sm" : ""}">
+          ${escapeHtml(value || "-")}
+        </div>
+      </div>
+    `;
+  }
+
+  // -----------------------------
+  // Project Detail Page
+  // -----------------------------
+  function renderProjectDetail(id) {
+    const project = getProjectById(id);
+
+    if (!project) {
+      appEl.innerHTML = `
+        <div class="min-h-screen bg-[#DFDFDF]">
+          <div class="max-w-5xl mx-auto px-6 py-10">
+            <h1 class="text-3xl font-semibold text-black" style="font-family:Poppins, ui-sans-serif">Project not found</h1>
+            <p class="mt-2 text-black/70" style="font-family:Poppins, ui-sans-serif">
+              We couldn't find a project with this ID. It may have been deleted or not saved yet.
+            </p>
+            <div class="mt-6">
+              <a href="#/projects" class="inline-flex items-center rounded-full bg-black text-white px-5 py-2 text-sm" style="font-family:Poppins, ui-sans-serif">
+                Back to Projects
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const projectImage = project.image ? project.image.replace(/^\//, "") : (project.repoUrl ? getGitHubOgImage(project.repoUrl) : "");
+
+    appEl.innerHTML = `
+      <div class="min-h-screen bg-[#DFDFDF]">
+        <div class="max-w-6xl mx-auto px-6 py-10">
+          <div class="flex items-center justify-between gap-4 mb-6">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl text-black font-semibold break-words" style="font-family:Poppins, ui-sans-serif">
+              ${escapeHtml(project.title || "Untitled Project")}
+            </h1>
+            <a href="#/projects" class="shrink-0 rounded-full border border-black/15 px-4 py-2 text-xs sm:text-sm text-black"
+               style="font-family:Poppins, ui-sans-serif">
+              Back to Projects
+            </a>
+          </div>
+
+          ${
+            projectImage
+              ? `<div class="mb-6 w-full overflow-hidden rounded-2xl bg-black/5">
+                  <img src="${escapeHtml(projectImage)}" alt="${escapeHtml(project.title || "")}" class="w-full max-h-[360px] object-cover" />
+                </div>`
+              : ""
+          }
+
+          <div class="text-sm sm:text-base text-black/70 mb-2" style="font-family:Poppins, ui-sans-serif">
+            ${escapeHtml(project.category || "")}${project.owner ? ` • ${escapeHtml(project.owner)}` : ""}
+          </div>
+
+          ${
+            project.repoUrl
+              ? `<div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:gap-3 text-xs sm:text-sm" style="font-family:Poppins, ui-sans-serif">
+                  <a href="${escapeHtml(project.repoUrl)}" target="_blank" rel="noreferrer"
+                    class="inline-flex items-center justify-center rounded-full bg-black text-white px-3 py-1 text-[11px] sm:text-xs hover:bg-black/90">
+                    Open in Browser
+                  </a>
+                  <a href="${escapeHtml(project.repoUrl)}"
+                    class="mt-2 sm:mt-0 inline-flex items-center justify-center rounded-full bg-black text-white px-3 py-1 text-[11px] sm:text-xs hover:bg-black/90">
+                    Launch project
+                  </a>
+                </div>`
+              : ""
+          }
+
+          ${
+            project.teamMemberFirstName
+              ? `<div class="mb-8 text-sm sm:text-base text-black/80" style="font-family:Poppins, ui-sans-serif">
+                  <span class="font-semibold">Team Member:</span>
+                  ${escapeHtml(project.teamMemberFirstName)} ${escapeHtml(project.teamMemberLastName || "")}
+                  ${project.teamMemberRole ? ` • ${escapeHtml(project.teamMemberRole)}` : ""}
+                  ${
+                    project.teamMemberDescription
+                      ? `<div class="mt-2 text-xs sm:text-sm text-black/70 whitespace-pre-wrap leading-relaxed">
+                          ${escapeHtml(project.teamMemberDescription)}
+                        </div>`
+                      : ""
+                  }
+                </div>`
+              : ""
+          }
+
+          <div class="columns-1 md:columns-2 [column-gap:1rem] md:[column-gap:1.5rem] text-sm sm:text-base text-black" style="font-family:Poppins, ui-sans-serif">
+            ${project.description ? detailCard("Overview", renderTextBlock(project.description)) : ""}
+            ${project.goal ? detailCard("Goal", renderTextBlock(project.goal)) : ""}
+            ${project.structureCapabilities ? detailCard("Structure & Capabilities", renderTextBlock(project.structureCapabilities)) : ""}
+
+            ${project.techStack ? detailCard("Technical Stack", renderTechStack(project.techStack)) : ""}
+            ${Array.isArray(project.features) && project.features.length ? detailCard("Key Features", renderFeatures(project.features)) : ""}
+
+            ${project.fileStructure ? detailCard("File Structure", `<div class=\"font-mono text-xs sm:text-sm\">${escapeHtml(project.fileStructure)}</div>`) : ""}
+            ${project.modules ? detailCard("Modules", renderModules(project.modules)) : ""}
+            ${project.moduleFunctions ? detailCard("Module Functions", renderTextBlock(project.moduleFunctions)) : ""}
+
+            ${project.problem ? detailCard("Problem it Solves", renderTextBlock(project.problem)) : ""}
+            ${project.impact ? detailCard("Impact", renderImpact(project.impact)) : ""}
+            ${project.data ? detailCard("Data", renderData(project.data)) : ""}
+            ${project.dataTypes ? detailCard("Data Types", renderTextBlock(project.dataTypes)) : ""}
+
+            ${Array.isArray(project.roadmap) && project.roadmap.length ? detailCard("Roadmap", renderRoadmap(project.roadmap)) : ""}
+            ${project.team ? detailCard("Team", renderTeam(project.team)) : ""}
+            ${project.conclusion ? detailCard("Conclusion", renderTextBlock(project.conclusion)) : ""}
+            ${project.health ? detailCard("Project Health", renderHealth(project.health)) : ""}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function detailCard(title, bodyHtml) {
+    return `
+      <div class="bg-white rounded-xl border border-black/5 p-4 break-inside-avoid mb-4">
+        <div class="text-sm sm:text-base font-semibold tracking-wide uppercase text-black/80">${escapeHtml(title)}</div>
+        <div class="mt-2 leading-relaxed">${bodyHtml || "-"}</div>
+      </div>
+    `;
+  }
+
+  function renderTextBlock(value) {
+    const raw = value == null ? "" : String(value);
+    const paras = raw
+      .split(/\n\s*\n/g)
+      .map((p) => p.trim())
+      .filter(Boolean);
+
+    if (!paras.length) return "-";
+
+    if (paras.length === 1) {
+      return `<p class="text-black/80">${escapeHtml(paras[0]).replace(/\n/g, "<br />")}</p>`;
+    }
+
+    return `<div class="space-y-2">${paras
+      .map((p) => `<p class="text-black/80">${escapeHtml(p).replace(/\n/g, "<br />")}</p>`)
+      .join("")}</div>`;
+  }
+
+  function renderTechStack(techStack) {
+    if (!techStack || typeof techStack !== "object") return "-";
+    return Object.entries(techStack)
+      .map(([k, v]) => `<div><span class="font-medium capitalize">${escapeHtml(k)}:</span> ${escapeHtml(Array.isArray(v) ? v.join(", ") : v)}</div>`)
+      .join("");
+  }
+
+  function renderFeatures(features) {
+    if (!Array.isArray(features)) return "-";
+    return `<ul class="list-disc pl-5 space-y-1">${features.map((f) => `<li>${escapeHtml(f)}</li>`).join("")}</ul>`;
+  }
+
+  function renderModules(modules) {
+    if (!modules || typeof modules !== "object") return "-";
+    return Object.entries(modules)
+      .map(([name, moduleData]) => {
+        const desc = moduleData?.description || "";
+        const comps = Array.isArray(moduleData?.components) ? moduleData.components : [];
+        return `
+          <div class="mb-4">
+            <div class="font-medium capitalize">${escapeHtml(name)}</div>
+            <div class="text-sm text-black/70">${escapeHtml(desc)}</div>
+            ${comps.length ? `<ul class="list-disc pl-5 mt-1 text-sm">${comps.map((c) => `<li>${escapeHtml(c)}</li>`).join("")}</ul>` : ""}
+          </div>
+        `;
+      })
+      .join("");
+  }
+
+  function renderImpact(impact) {
+    if (!impact) return "-";
+    const metrics = Array.isArray(impact.metrics) ? impact.metrics : [];
+    const benefits = Array.isArray(impact.benefits) ? impact.benefits : [];
+    return `
+      <div class="space-y-4">
+        <div>
+          <div class="font-medium">Metrics:</div>
+          <ul class="list-disc pl-5 mt-1">${metrics.map((m) => `<li>${escapeHtml(m)}</li>`).join("")}</ul>
+        </div>
+        <div>
+          <div class="font-medium">Benefits:</div>
+          <ul class="list-disc pl-5 mt-1">${benefits.map((b) => `<li>${escapeHtml(b)}</li>`).join("")}</ul>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderData(data) {
+    if (!data) return "-";
+    const sources = Array.isArray(data.sources) ? data.sources : [];
+    const types = Array.isArray(data.types) ? data.types : [];
+    return `
+      <div class="space-y-4">
+        <div>
+          <div class="font-medium">Sources:</div>
+          <ul class="list-disc pl-5 mt-1">${sources.map((s) => `<li>${escapeHtml(s)}</li>`).join("")}</ul>
+        </div>
+        <div>
+          <div class="font-medium">Types:</div>
+          <div class="mt-1">${escapeHtml(types.join(", "))}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderRoadmap(roadmap) {
+    if (!Array.isArray(roadmap)) return "-";
+    return `
+      <div class="space-y-4">
+        ${roadmap
+          .map(
+            (phase) => `
+          <div class="border-l-2 pl-3 border-black/10">
+            <div class="font-medium">${escapeHtml(phase.phase)} <span class="text-sm font-normal text-black/60">(${escapeHtml(phase.status)})</span></div>
+            <ul class="list-disc pl-5 mt-1">
+              ${(Array.isArray(phase.items) ? phase.items : []).map((i) => `<li class="text-sm">${escapeHtml(i)}</li>`).join("")}
+            </ul>
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    `;
+  }
+
+  function renderTeam(team) {
+    if (!team) return "-";
+    const members = Array.isArray(team.members) ? team.members : [];
+    const collab = Array.isArray(team.collaboration) ? team.collaboration : [];
+    return `
+      <div class="space-y-4">
+        <div>
+          <div class="font-medium">Team Members:</div>
+          <ul class="mt-1 space-y-2">
+            ${members.map((m) => `<li><span class="font-medium">${escapeHtml(m.name)}</span> • ${escapeHtml(m.role)}</li>`).join("")}
+          </ul>
+        </div>
+        <div>
+          <div class="font-medium">Collaboration:</div>
+          <ul class="list-disc pl-5 mt-1">${collab.map((c) => `<li>${escapeHtml(c)}</li>`).join("")}</ul>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderHealth(health) {
+    if (!health) return "-";
+    return `
+      <div class="space-y-2">
+        <div><span class="font-medium">Status:</span> ${escapeHtml(health.status)}</div>
+        <div><span class="font-medium">Last Deployed:</span> ${escapeHtml(health.lastDeployed)}</div>
+        <div><span class="font-medium">Open Issues:</span> ${escapeHtml(health.openIssues)}</div>
+        <div><span class="font-medium">Test Coverage:</span> ${escapeHtml(health.testCoverage)}</div>
+      </div>
+    `;
+  }
+
+  // -----------------------------
+  // Team Page + Member Page
+  // -----------------------------
+  function renderTeamPage() {
+    const mountedClass = state.projectsPage.mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4";
+    const filters = ["All", "Computer Science", "Architects"];
+    const members = Array.isArray(state.projectsPage.teamMembers) ? state.projectsPage.teamMembers : [];
+    const sortedMembers = [...members].sort((a, b) => {
+      const aOrder = Number.isFinite(Number(a?.sortOrder)) ? Number(a.sortOrder) : Number.POSITIVE_INFINITY;
+      const bOrder = Number.isFinite(Number(b?.sortOrder)) ? Number(b.sortOrder) : Number.POSITIVE_INFINITY;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      return String(a?.name || "").localeCompare(String(b?.name || ""));
+    });
+
+    appEl.innerHTML = `
+      <div class="min-h-screen bg-neutral-200 transition-all duration-500 ease-out ${mountedClass}">
+        <div class="max-w-7xl mx-auto px-6 py-10">
+          <div class="flex items-center justify-between gap-4">
+            <h1 class="text-black text-3xl sm:text-4xl md:text-6xl" style="font-family:Poppins, ui-sans-serif; font-weight:400">
+              Meet Our Team!
+            </h1>
+          </div>
+
+          <div class="mt-10 flex items-center gap-4 justify-center">
+            ${filters
+              .map(
+                (f, i) => `
+              <button class="px-6 py-2 rounded-full ${i === 0 ? "bg-black text-white" : "bg-white/40 text-black"} shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)]"
+                style="font-family:Poppins, ui-sans-serif; font-size:20px">
+                ${escapeHtml(f)}
+              </button>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+
+        <section class="w-full bg-black">
+          <div class="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            ${sortedMembers
+              .map(
+                (m) => `
+              <a href="#/team/${encodeURIComponent(m.slug)}" class="block">
+                <div class="group relative bg-white/5 rounded-3xl backdrop-blur-[1px] overflow-hidden transition-transform transition-shadow duration-300 hover:-translate-y-1 hover:shadow-xl">
+                  <img src="${escapeHtml(m.img)}" alt="${escapeHtml(m.name)}"
+                    class="w-full h-60 object-cover transform scale-[1.06] transition-transform duration-500 group-hover:scale-[1.12]" />
+                  <div class="p-4">
+                    <div class="text-white text-2xl" style="font-family:Poppins, ui-sans-serif">${escapeHtml(m.name)}</div>
+                    <div class="text-white/60 text-base leading-8" style="font-family:Poppins, ui-sans-serif">${escapeHtml(m.role)}</div>
+                  </div>
+                </div>
+              </a>
+            `
+              )
+              .join("")}
+          </div>
+        </section>
+      </div>
+    `;
+  }
+
+  function renderTeamMember(slug) {
+    const members = state.projectsPage.teamMembers;
+    const m = members.find((x) => x.slug === slug);
+
+    if (!m) {
+      appEl.innerHTML = `
+        <div class="min-h-screen bg-neutral-200">
+          <div class="max-w-5xl mx-auto px-6 py-10">
+            <h1 class="text-3xl font-semibold text-black" style="font-family:Poppins, ui-sans-serif">Team member not found</h1>
+            <a href="#/team" class="mt-6 inline-flex items-center rounded-full bg-black text-white px-5 py-2 text-sm" style="font-family:Poppins, ui-sans-serif">
+              Back to Team
+            </a>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const derivedProjects = (Array.isArray(state.projects) ? state.projects : [])
+      .filter((p) => {
+        const ownerRaw = String(p?.owner || "").trim();
+        const byNameRaw = `${String(p?.teamMemberFirstName || "").trim()} ${String(p?.teamMemberLastName || "").trim()}`.trim();
+
+        const owner = ownerRaw.toLowerCase();
+        const byName = byNameRaw.toLowerCase();
+
+        const needleFull = String(m.name || "").trim().toLowerCase();
+        const needleParts = needleFull.split(/\s+/).filter(Boolean);
+        const needleFirst = needleParts[0] || "";
+        const needleLast = needleParts.length ? needleParts[needleParts.length - 1] : "";
+
+        const ownerMatches =
+          (owner && needleFull && owner === needleFull) ||
+          (owner && needleFirst && owner === needleFirst) ||
+          (owner && needleLast && owner === needleLast) ||
+          (owner && needleFull && needleFull.includes(owner));
+
+        const byNameMatches =
+          (byName && needleFull && byName === needleFull) ||
+          (byName && needleFirst && byName.includes(needleFirst)) ||
+          (byName && needleLast && byName.includes(needleLast));
+
+        return ownerMatches || byNameMatches;
+      })
+      .map((p) => {
+        const img = p?.image ? String(p.image).replace(/^\//, "") : "";
+        return {
+          title: p?.title ? String(p.title) : "Untitled",
+          subtitle: `${String(p?.category || "Project")}`.trim(),
+          img,
+          href: p?.id ? `#/projects/${encodeURIComponent(String(p.id))}` : "#/projects",
+        };
+      });
+
+    const projectsToShow = Array.isArray(m.projects) && m.projects.length ? m.projects : derivedProjects;
+
+    appEl.innerHTML = `
+      <div class="min-h-screen bg-black text-white">
+        <div class="max-w-6xl mx-auto px-6 py-12">
+          <div class="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-10 items-start">
+            <div class="flex flex-col items-center lg:items-start gap-4">
+              <div class="w-full max-w-[320px] rounded-3xl overflow-hidden border border-white/10 bg-white/5 shadow-[0_25px_80px_rgba(0,0,0,0.55)]">
+                <img src="${escapeHtml(m.img)}" alt="${escapeHtml(m.name)}" class="w-full h-[380px] object-cover transform scale-[1.06]" style="object-position: 50% 20%;" />
+              </div>
+
+              <div class="w-full max-w-[320px] flex items-center gap-3 text-white/80">
+                ${m.githubUrl
+                  ? `
+                    <a href="${escapeHtml(m.githubUrl)}" target="_blank" rel="noreferrer" class="hover:text-white transition-colors" aria-label="GitHub">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 .5C5.73.5.75 5.67.75 12.06c0 5.1 3.32 9.43 7.93 10.96.58.11.79-.26.79-.57v-2.1c-3.22.72-3.9-1.41-3.9-1.41-.53-1.38-1.29-1.75-1.29-1.75-1.05-.74.08-.73.08-.73 1.16.08 1.77 1.22 1.77 1.22 1.03 1.81 2.7 1.29 3.36.98.1-.77.4-1.29.72-1.59-2.57-.3-5.27-1.32-5.27-5.88 0-1.3.45-2.36 1.19-3.2-.12-.3-.52-1.52.11-3.17 0 0 .97-.32 3.18 1.22.92-.26 1.9-.39 2.88-.39.98 0 1.96.13 2.88.39 2.2-1.54 3.17-1.22 3.17-1.22.64 1.65.24 2.87.12 3.17.74.84 1.18 1.9 1.18 3.2 0 4.57-2.7 5.58-5.28 5.88.41.37.78 1.08.78 2.18v3.23c0 .32.21.69.8.57 4.6-1.53 7.92-5.86 7.92-10.96C23.25 5.67 18.27.5 12 .5z"/>
+                      </svg>
+                    </a>
+                  `
+                  : ""}
+                ${m.linkedinUrl
+                  ? `
+                    <a href="${escapeHtml(m.linkedinUrl)}" target="_blank" rel="noreferrer" class="hover:text-white transition-colors" aria-label="LinkedIn">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M4.98 3.5C3.88 3.5 3 4.4 3 5.5s.88 2 1.98 2h.02C6.1 7.5 7 6.6 7 5.5S6.1 3.5 5 3.5h-.02zM3.5 8.75H6.5V21.5H3.5V8.75zM9 8.75h2.88v1.74h.04c.4-.76 1.38-1.56 2.85-1.56 3.05 0 3.62 2.06 3.62 4.74v7.83h-3V14.4c0-1.67-.03-3.82-2.3-3.82-2.3 0-2.65 1.86-2.65 3.69v7.23H9V8.75z"/>
+                      </svg>
+                    </a>
+                  `
+                  : ""}
+                ${m.websiteUrl
+                  ? `
+                    <a href="${escapeHtml(m.websiteUrl)}" target="_blank" rel="noreferrer" class="hover:text-white transition-colors" aria-label="Website">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M10.59 13.41a1.996 1.996 0 0 0 2.82 0l3.3-3.3a2 2 0 1 0-2.82-2.82l-.88.88-1.41-1.41.88-.88a4 4 0 0 1 5.66 5.66l-3.3 3.3a4 4 0 0 1-5.66 0l-.88-.88 1.41-1.41.88.86z"/>
+                        <path d="M13.41 10.59a1.996 1.996 0 0 0-2.82 0l-3.3 3.3a2 2 0 0 0 2.82 2.82l.88-.88 1.41 1.41-.88.88a4 4 0 1 1-5.66-5.66l3.3-3.3a4 4 0 0 1 5.66 0l.88.88-1.41 1.41-.88-.86z"/>
+                      </svg>
+                    </a>
+                  `
+                  : ""}
+              </div>
+
+              <a href="#/team" class="mt-2 text-xs text-white/70 hover:text-white underline-offset-4 hover:underline" style="font-family:Poppins, ui-sans-serif">
+                Back to team
+              </a>
+            </div>
+
+            <div>
+              <h1 class="text-3xl sm:text-4xl md:text-5xl" style="font-family:Poppins, ui-sans-serif; font-weight:600">
+                ${escapeHtml(m.name)}
+              </h1>
+              ${m.role ? `<div class="mt-2 text-white/70" style="font-family:Poppins, ui-sans-serif">${escapeHtml(m.role)}</div>` : ""}
+
+              ${m.bio
+                ? `
+                  <p class="mt-5 text-white/80 leading-relaxed" style="font-family:Poppins, ui-sans-serif, system-ui">
+                    ${escapeHtml(m.bio)}
+                  </p>
+                `
+                : ""}
+
+              ${Array.isArray(m.highlights) && m.highlights.length
+                ? `
+                  <div class="mt-8">
+                    <div class="text-sm font-semibold" style="font-family:Poppins, ui-sans-serif">Highlights</div>
+                    <ul class="mt-3 space-y-1.5 text-white/80 text-sm leading-relaxed" style="font-family:Poppins, ui-sans-serif, system-ui">
+                      ${m.highlights.map((h) => `<li class="flex gap-2"><span class="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-white/70"></span><span>${escapeHtml(h)}</span></li>`).join("")}
+                    </ul>
+                  </div>
+                `
+                : ""}
+
+              ${Array.isArray(m.education) && m.education.length
+                ? `
+                  <div class="mt-8">
+                    <div class="text-sm font-semibold" style="font-family:Poppins, ui-sans-serif">Education</div>
+                    <ul class="mt-3 space-y-1.5 text-white/80 text-sm leading-relaxed" style="font-family:Poppins, ui-sans-serif, system-ui">
+                      ${m.education.map((e) => `<li class="flex gap-2"><span class=\"mt-1 inline-block h-1.5 w-1.5 rounded-full bg-white/70\"></span><span>${escapeHtml(e)}</span></li>`).join("")}
+                    </ul>
+                  </div>
+                `
+                : ""}
+
+              ${Array.isArray(m.skills) && m.skills.length
+                ? `
+                  <div class="mt-8">
+                    <div class="text-sm font-semibold" style="font-family:Poppins, ui-sans-serif">Skills</div>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      ${m.skills
+                        .map(
+                          (s) => `
+                          <span class="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/80">
+                            ${escapeHtml(s)}
+                          </span>
+                        `
+                        )
+                        .join("")}
+                    </div>
+                  </div>
+                `
+                : ""}
+
+              ${Array.isArray(m.languages) && m.languages.length
+                ? `
+                  <div class="mt-8">
+                    <div class="text-sm font-semibold" style="font-family:Poppins, ui-sans-serif">Languages</div>
+                    <ul class="mt-3 space-y-1.5 text-white/80 text-sm leading-relaxed" style="font-family:Poppins, ui-sans-serif, system-ui">
+                      ${m.languages.map((l) => `<li class="flex gap-2"><span class="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-white/70"></span><span>${escapeHtml(l)}</span></li>`).join("")}
+                    </ul>
+                  </div>
+                `
+                : ""}
+
+              ${Array.isArray(projectsToShow) && projectsToShow.length
+                ? `
+                  <div class="mt-10">
+                    <div class="text-sm font-semibold" style="font-family:Poppins, ui-sans-serif">Projects</div>
+                    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      ${projectsToShow
+                        .slice(0, 4)
+                        .map((p) => {
+                          const href = p && (p.href || p.url || p.demoUrl || p.repoUrl) ? String(p.href || p.url || p.demoUrl || p.repoUrl) : "";
+                          const title = p && p.title ? String(p.title) : "Untitled";
+                          const subtitle = p && p.subtitle ? String(p.subtitle) : "";
+                          const img = p && (p.image || p.img) ? String(p.image || p.img) : "";
+                          const card = `
+                            <div class="rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-[0_20px_60px_rgba(0,0,0,0.55)]">
+                              <div class="aspect-[16/9] bg-white/10">
+                                ${img ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(title)}" class="w-full h-full object-cover" />` : ""}
+                              </div>
+                              <div class="p-4">
+                                <div class="font-semibold text-white" style="font-family:Poppins, ui-sans-serif">${escapeHtml(title)}</div>
+                                ${subtitle ? `<div class="mt-1 text-xs text-white/60" style="font-family:Poppins, ui-sans-serif">${escapeHtml(subtitle)}</div>` : ""}
+                              </div>
+                            </div>
+                          `;
+                          return href
+                            ? `<a href="${escapeHtml(href)}" target="_blank" rel="noreferrer" class="block hover:translate-y-[-2px] transition-transform">${card}</a>`
+                            : card;
+                        })
+                        .join("")}
+                    </div>
+                  </div>
+                `
+                : ""}
+
+              ${m.experience
+                ? `
+                  <div class="mt-10">
+                    <div class="text-sm font-semibold" style="font-family:Poppins, ui-sans-serif">Experience</div>
+                    <div class="mt-3 text-white/80 text-sm leading-relaxed" style="font-family:Poppins, ui-sans-serif, system-ui">
+                      ${Array.isArray(m.experience)
+                        ? `<ul class="space-y-1.5">${m.experience.map((e) => `<li class="flex gap-2"><span class="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-white/70"></span><span>${escapeHtml(e)}</span></li>`).join("")}</ul>`
+                        : `<p>${escapeHtml(m.experience)}</p>`}
+                    </div>
+                  </div>
+                `
+                : ""}
+
+              ${Array.isArray(m.extracurriculars) && m.extracurriculars.length
+                ? `
+                  <div class="mt-10">
+                    <div class="text-sm font-semibold" style="font-family:Poppins, ui-sans-serif">Extracurriculars</div>
+                    <ul class="mt-3 space-y-1.5 text-white/80 text-sm leading-relaxed" style="font-family:Poppins, ui-sans-serif, system-ui">
+                      ${m.extracurriculars.map((x) => `<li class="flex gap-2"><span class="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-white/70"></span><span>${escapeHtml(x)}</span></li>`).join("")}
+                    </ul>
+                  </div>
+                `
+                : ""}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // -----------------------------
+  // Learning Hub
+  // -----------------------------
+  function initLearningData() {
+    const savedSections = localStorage.getItem("learningHubSections");
+    if (savedSections) {
+      state.learning.sections = JSON.parse(savedSections);
+    } else {
+      state.learning.sections = {
+        courses: {
+          title: "Courses / Workshops",
+          description: "Organize short courses or workshops on digital twins, data, and tools for your class or lab.",
+          items: [
+            "1-week bootcamp: Intro to Digital Twins.",
+            "Studio workshop: From GIS data to 3D twin.",
+            "Guest lecture series with industry partners.",
+          ],
+        },
+        videos: {
+          title: "Video lessons",
+          description: "Curate or embed video explainers that walk through core ideas and example digital twin builds.",
+          items: [
+            '"What is a Digital Twin?" concept video.',
+            "Screen-recorded tutorial building a campus energy map.",
+            "Walkthrough of a full student project presentation.",
+          ],
+        },
+        tutorials: {
+          title: "Step-by-step tutorials",
+          description: "Build guided tutorials that students can follow at their own pace, from data import to dashboards.",
+          items: [
+            "Importing open data into QGIS and cleaning it.",
+            "Connecting a live sensor feed to a simple dashboard.",
+            "Publishing a web map of a neighborhood twin.",
+          ],
+        },
+        labs: {
+          title: "Hands-on labs",
+          description: "Design labs where students work with real geospatial or sensor data to prototype digital twins.",
+          items: [
+            "Lab: Measure and map temperatures across a campus.",
+            "Lab: Build a small traffic flow simulation for one street.",
+            "Lab: Compare baseline vs. retrofitted building energy.",
+          ],
+        },
+        templates: {
+          title: "Student project templates",
+          description: "Provide structured templates for student projects, including goals, data sources, and evaluation.",
+          items: [
+            "Template: Building energy and comfort twin.",
+            "Template: Public space usage and mobility twin.",
+            "Template: Environmental monitoring twin for air or water.",
+          ],
+        },
+        caseStudies: {
+          title: "Case Studies",
+          description: "Explore real-world applications of digital twins across different industries and domains.",
+          items: [
+            "Smart city implementation in Singapore",
+            "Predictive maintenance in manufacturing",
+            "Healthcare digital twins for patient monitoring",
+          ],
+        },
+      };
+    }
+
+    const savedPathways = localStorage.getItem("learningHubPathways");
+    state.learning.pathways = savedPathways
+      ? JSON.parse(savedPathways)
+      : {
+          gis: {
+            title: "GIS Basics",
+            description: "Learn how maps, layers, and spatial data work so you can bring real-world geography into your twins.",
+            items: ["Reading shapefiles and GeoJSON.", "Understanding coordinate systems.", "Making your first styled map of a campus."],
+          },
+          python: {
+            title: "Python for geospatial",
+            description: "Use Python libraries to clean, join, and analyze spatial datasets.",
+            items: ["Intro notebook: loading and plotting spatial data.", "Joining census and boundary data for a city.", "Simple spatial queries (buffers, intersections)."],
+          },
+          fundamentals: {
+            title: "Digital Twin fundamentals",
+            description: "Connect data, models, and visualization to create twins of buildings, campuses, or cities.",
+            items: ["Conceptual model: physical system → data → virtual model.", "Examples of twins at different scales (room, building, city).", "How to scope a realistic student twin project."],
+          },
+          ai: {
+            title: "AI for environmental modeling",
+            description: "Apply machine learning to forecast energy use, emissions, or environmental indicators in your twins.",
+            items: ["Predicting hourly energy consumption from weather data.", "Training a simple air quality prediction model.", "Comparing baseline vs. intervention scenarios with AI."],
+          },
+        };
+
+    localStorage.setItem("learningHubSections", JSON.stringify(state.learning.sections));
+    localStorage.setItem("learningHubPathways", JSON.stringify(state.learning.pathways));
+  }
+
+  function renderLearningHub() {
+    const sections = state.learning.sections || {};
+    const currentDetail = state.learning.currentDetail;
+
+    appEl.innerHTML = `
+      <div class="space-y-10 relative p-6">
+        <div class="pointer-events-none absolute inset-x-0 -top-10 bottom-0 -z-10 opacity-50">
+          <div class="h-full w-full bg-gradient-to-br from-sky-200/40 via-emerald-200/40 to-purple-200/40 blur-3xl animate-pulse"></div>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <h1 class="text-3xl font-bold text-gray-900" style="font-family:Poppins, ui-sans-serif, system-ui">Learning Hub</h1>
+        </div>
+
+        <section class="space-y-4">
+          <h2 class="text-2xl font-semibold text-gray-900" style="font-family:Poppins, ui-sans-serif, system-ui">Browse Learning Materials</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            ${Object.entries(sections)
+              .map(([key, s]) => {
+                return `
+                  <div data-open-learning="${escapeHtml(key)}"
+                    class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-3 relative group cursor-pointer hover:shadow-md transition-shadow">
+                    <h2 class="text-xl font-semibold text-gray-900" style="font-family:Poppins, ui-sans-serif, system-ui">
+                      ${escapeHtml(s.title)}
+                    </h2>
+                    <p class="text-gray-600 text-sm" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+                      ${escapeHtml(s.description)}
+                    </p>
+                    <ul class="list-disc pl-5 space-y-1 text-xs text-gray-700">
+                      ${(Array.isArray(s.items) ? s.items : []).map((it) => `<li>${escapeHtml(it)}</li>`).join("")}
+                    </ul>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
+        </section>
+
+        ${currentDetail ? renderLearningDetailModal(currentDetail) : ""}
+      </div>
+    `;
+
+    document.querySelectorAll("[data-open-learning]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const key = el.getAttribute("data-open-learning");
+        const s = state.learning.sections[key];
+        state.learning.currentDetail = {
+          title: s?.title || "Untitled",
+          body: s?.content?.body || s?.description || "",
+        };
+        render();
+      });
+    });
+
+    document.getElementById("closeLearningDetail")?.addEventListener("click", () => {
+      state.learning.currentDetail = null;
+      render();
+    });
+    document.getElementById("learningDetailBackdrop")?.addEventListener("click", () => {
+      state.learning.currentDetail = null;
+      render();
+    });
+  }
+
+  function renderLearningDetailModal(detail) {
+    return `
+      <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div id="learningDetailBackdrop" class="absolute inset-0"></div>
+        <div class="relative bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div class="sticky top-0 bg-white p-4 border-b flex justify-between items-center">
+            <h2 class="text-2xl font-semibold">${escapeHtml(detail.title)}</h2>
+            <button id="closeLearningDetail" class="p-2 text-gray-500 hover:text-gray-700">✕</button>
+          </div>
+          <div class="p-6">
+            <div class="prose max-w-none">
+              <p>${escapeHtml(detail.body)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // -----------------------------
+  // Contact Page (simple)
+  // -----------------------------
+  function renderContact() {
+    appEl.innerHTML = `
+      <div class="min-h-screen bg-gray-50">
+        <div class="max-w-5xl mx-auto px-6 py-14">
+          <div class="min-h-[62vh] flex flex-col justify-center text-center">
+            <h1 class="text-5xl sm:text-6xl md:text-7xl text-black" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; font-weight:500; line-height:1.05">
+              Our Mission
+            </h1>
+            <p class="mt-6 text-black/80 leading-relaxed text-base sm:text-lg md:text-xl max-w-4xl mx-auto" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+              Our mission is to empower creators, students, and innovators by providing a unified digital space where ideas can grow into impactful projects. We aim to make collaboration seamless, project tracking transparent, and innovation accessible to everyone. By supporting diverse content—from code and AI models to 3D designs and research data—we strive to inspire cross-disciplinary learning and foster a community where knowledge is shared, creativity thrives, and every project has the tools it needs to succeed.
+            </p>
+          </div>
+
+          <div class="mt-10">
+            <h2 class="text-3xl md:text-4xl font-semibold text-black" style="font-family:Poppins, ui-sans-serif">Contact</h2>
+            <p class="mt-3 text-black/70 text-base md:text-lg" style="font-family:Poppins, ui-sans-serif">
+              Reach out to the coordinators for access, feedback, or publishing your project.
+            </p>
+
+            <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 text-sm md:text-base">
+              <div>
+                <div class="text-black font-semibold" style="font-family:Poppins, ui-sans-serif">Email</div>
+                <div class="mt-1 text-black/80" style="font-family:Poppins, ui-sans-serif, system-ui">DigitalTwinsHub@yahoo.com</div>
+              </div>
+              <div>
+                <div class="text-black font-semibold" style="font-family:Poppins, ui-sans-serif">Slack</div>
+                <div class="mt-1 text-black/80" style="font-family:Poppins, ui-sans-serif, system-ui">Digital Twins Fellowship</div>
+              </div>
+              <div>
+                <div class="text-black font-semibold" style="font-family:Poppins, ui-sans-serif">Discord</div>
+                <a class="mt-1 inline-block text-black/80 underline underline-offset-4 hover:text-black" href="https://discord.gg/nu6Vmjgd" target="_blank" rel="noreferrer"
+                  style="font-family:Poppins, ui-sans-serif, system-ui">https://discord.gg/nu6Vmjgd</a>
+              </div>
+              <div>
+                <div class="text-black font-semibold" style="font-family:Poppins, ui-sans-serif">Maintainers</div>
+                <div class="mt-1 text-black/80" style="font-family:Poppins, ui-sans-serif, system-ui">Project Office</div>
+              </div>
+              <div class="sm:col-span-2 lg:col-span-2">
+                <div class="text-black font-semibold" style="font-family:Poppins, ui-sans-serif">Location</div>
+                <div class="mt-1 text-black/80" style="font-family:Poppins, ui-sans-serif, system-ui">Los Angeles Trade Technical-College</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // -----------------------------
+  // Main render()
+  // -----------------------------
+  let lastRenderedRouteName = null;
+  function render() {
+    renderNavbar();
+    renderChatAssistant();
+
+    const route = parseRoute();
+
+    if (!state.home.featuredProjects.length) initHomeData();
+    if (!state.learning.sections) initLearningData();
+    loadTeamMembers();
+
+    // mark mounted states
+    state.home.mounted = true;
+    state.projectsPage.mounted = true;
+
+    if (route.name === "home") renderHome();
+    else if (route.name === "projects") renderProjectsPage();
+    else if (route.name === "projectDetail") renderProjectDetail(route.id);
+    else if (route.name === "team") renderTeamPage();
+    else if (route.name === "teamMember") renderTeamMember(route.slug);
+    else if (route.name === "learning") renderLearningHub();
+    else if (route.name === "contact") renderContact();
+    else renderHome();
+
+    lastRenderedRouteName = route.name;
+    ensureHomeInterval();
+  }
+
+  let isTransitioning = false;
+  async function renderWithTransition() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+
+    const nextRoute = parseRoute();
+    const isHomeToOrFrom = lastRenderedRouteName === "home" || nextRoute.name === "home";
+
+    if (appEl && !isHomeToOrFrom) appEl.classList.add("app-transitioning");
+
+    if (!isHomeToOrFrom) await new Promise((r) => setTimeout(r, 120));
+    render();
+
+    applyEnterTextAnimations();
+
+    requestAnimationFrame(() => {
+      if (appEl) appEl.classList.remove("app-transitioning");
+      setTimeout(() => {
+        isTransitioning = false;
+      }, 260);
+    });
+  }
+
+  window.addEventListener("hashchange", renderWithTransition);
+  window.addEventListener("load", render);
+
+  // Initial kick
+  render();
+})();
