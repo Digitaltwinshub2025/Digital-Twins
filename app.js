@@ -64,6 +64,23 @@
       languages: ["English (fluent)", "Spanish (fluent)", "Chinese (spoken)"],
       extracurriculars: ["SHPE", "STEM Advantage", "MESA", "Attended HACKMESA 2025 and BroncoHacks 2025", "GameGala 2025: Judged K–12 students’ Computer Science projects"],
     },
+    {
+      name: "Monique Nogueira",
+      role: "Architect & Interior Designer",
+      img: "Team Members/Monique%20Nogueira.jpg",
+      slug: "monique-nogueira",
+      sortOrder: 3,
+      bio:
+        "I am an Brazilian architect and interior designer with nearly 10 years of experience in furniture design, renovation projects, lighting design, and site management. Since moving to the United States, my perspective on architecture has expanded, inspiring me to focus on environmental and sustainable design. My experience in the Summer Internship confirmed how architecture can be a powerful tool to make the world a better place. I am passionate about creating functional and inspiring spaces while embracing new opportunities to contribute to a more sustainable future.",
+      education: [
+        "Bachelor’s Degree in Architecture and Urbanism at Uniredentor Afya – 2015 - 2022 (Brazil)",
+        "AA Architectural Technology and Environmental Design LATTC",
+        "Postgraduate in Lighting Design at EBAC – 2024 (Brazil)",
+        "Foundations of Green Building - USBGC",
+        "Climate Change and Built Enviroment Course - CC WLAC",
+      ],
+      skills: ["Autocad", "Revit (student)", "Promob", "AURA", "ArchGIS", "Rhino (Student)"],
+    },
     { name: "Priya N", role: "Systems", img: "https://placehold.co/254x240", slug: "priya-n" },
     { name: "John Appleseed", role: "Architecture", img: "https://placehold.co/254x240", slug: "john-appleseed" },
   ];
