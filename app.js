@@ -127,6 +127,16 @@
         "Ensure data accuracy, role-based access, and backup/restore maintenance.",
       ],
     },
+    {
+      name: "Michael Lee",
+      role: "Technology & Design",
+      img: "Team Members/Michael%20Lee.jfif",
+      slug: "michael-lee",
+      sortOrder: 5,
+      bio:
+        "Michael Lee is a technology and design professional focused on building digital experiences at the intersection of creativity and software. With a background in art, graphic design, and computer information systems, he works on projects involving digital twin technology, web development, and AI-driven solutions. His work centers on turning ideas into practical tools, visual systems, and interactive products that solve real-world problems.",
+      experience: ["Project Lead on Alley Bloom — Water Alley."],
+    },
     { name: "Priya N", role: "Systems", img: "https://placehold.co/254x240", slug: "priya-n" },
     { name: "John Appleseed", role: "Architecture", img: "https://placehold.co/254x240", slug: "john-appleseed" },
   ];

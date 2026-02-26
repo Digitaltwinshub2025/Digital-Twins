@@ -575,6 +575,11 @@ window.PROJECTS_CATALOG = [
       'Scenario comparison outputs',
     conclusion:
       'Alley Bloom showcases how an interactive digital twin can turn a neglected urban alley into a data-driven vision for community resilience. By blending real-world data with human-centered design concepts, the project provides a compelling framework for rethinking small urban spaces with big impact.',
+
+    team: {
+      members: [{ name: 'Michael Lee', role: 'Project Lead' }],
+      collaboration: [],
+    },
   },
 ];
 
