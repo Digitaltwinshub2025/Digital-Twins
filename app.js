@@ -443,7 +443,11 @@
     const flagship = shuffled.filter((p) => p && p.projectType === "flagship");
     const sourceForFeatured = flagship.length > 0 ? flagship : shuffled;
     state.home.featuredProjects = sourceForFeatured.slice(0, Math.min(3, sourceForFeatured.length));
-    state.home.projectOfMonth = shuffled[0] || null;
+
+    const mostRecentWithVideo = [...catalog]
+      .reverse()
+      .find((p) => p && (p.videoEmbedUrl || p.videoUrl));
+    state.home.projectOfMonth = mostRecentWithVideo || shuffled[0] || null;
   }
 
   function homeLeaders() {
@@ -596,9 +600,13 @@
               </div>
 
               <div class="aspect-video bg-black">
-                <video class="w-full h-full" controls autoplay loop muted playsinline
-                  src="${escapeHtml((pom && pom.videoUrl) || "Featured Projects/Mastering Agile Sprints_ A Manager's Guide.mp4")}">
-                </video>
+                ${
+                  pom && pom.videoEmbedUrl
+                    ? `<iframe class="w-full h-full" src="${escapeHtml(String(pom.videoEmbedUrl))}" allow="autoplay" allowfullscreen></iframe>`
+                    : pom && pom.videoUrl
+                      ? `<a href="${escapeHtml(String(pom.videoUrl))}" target="_blank" rel="noreferrer" class="w-full h-full flex items-center justify-center text-white/80 hover:text-white underline-offset-4 hover:underline" style="font-family:Poppins, ui-sans-serif">Watch video</a>`
+                      : `<div class="w-full h-full flex items-center justify-center text-white/60" style="font-family:Poppins, ui-sans-serif">No video available</div>`
+                }
               </div>
 
               <div class="px-6 py-5 space-y-3 text-sm md:text-base" style="font-family:Poppins, ui-sans-serif, system-ui">
