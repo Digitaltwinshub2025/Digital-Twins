@@ -72,6 +72,11 @@
       sortOrder: 3,
       bio:
         "I am an Brazilian architect and interior designer with nearly 10 years of experience in furniture design, renovation projects, lighting design, and site management. Since moving to the United States, my perspective on architecture has expanded, inspiring me to focus on environmental and sustainable design. My experience in the Summer Internship confirmed how architecture can be a powerful tool to make the world a better place. I am passionate about creating functional and inspiring spaces while embracing new opportunities to contribute to a more sustainable future.",
+      highlights: [
+        "Nearly 10 years of experience across furniture design, renovations, lighting design, and site management.",
+        "Focused on environmental and sustainable design with a global perspective.",
+        "Committed to creating functional, inspiring spaces that make a positive impact.",
+      ],
       education: [
         "Bachelor’s Degree in Architecture and Urbanism at Uniredentor Afya – 2015 - 2022 (Brazil)",
         "AA Architectural Technology and Environmental Design LATTC",
@@ -80,6 +85,11 @@
         "Climate Change and Built Enviroment Course - CC WLAC",
       ],
       skills: ["Autocad", "Revit (student)", "Promob", "AURA", "ArchGIS", "Rhino (Student)"],
+      experience: [
+        "Architect and interior designer with project experience in furniture design and renovation work.",
+        "Lighting design work supported by postgraduate training (EBAC – 2024).",
+        "Site coordination and design development experience across multi-phase projects.",
+      ],
     },
     {
       name: "Saron Feyisa",
@@ -1760,7 +1770,7 @@
               <a href="#/team/${encodeURIComponent(m.slug)}" class="block">
                 <div class="group relative bg-white/5 rounded-3xl backdrop-blur-[1px] overflow-hidden transition-transform transition-shadow duration-300 hover:-translate-y-1 hover:shadow-xl">
                   <img src="${escapeHtml(m.img)}" alt="${escapeHtml(m.name)}"
-                    class="w-full h-60 object-cover transform scale-[1.06] transition-transform duration-500 group-hover:scale-[1.12]" />
+                    class="w-full h-60 object-cover transform scale-[1.1] transition-transform duration-500 group-hover:scale-[1.15]" style="object-position: 50% 20%;" />
                   <div class="p-4">
                     <div class="text-white text-2xl" style="font-family:Poppins, ui-sans-serif">${escapeHtml(m.name)}</div>
                     <div class="text-white/60 text-base leading-8" style="font-family:Poppins, ui-sans-serif">${escapeHtml(m.role)}</div>
@@ -1838,7 +1848,7 @@
           <div class="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-10 items-start">
             <div class="flex flex-col items-center lg:items-start gap-4">
               <div class="w-full max-w-[320px] rounded-3xl overflow-hidden border border-white/10 bg-white/5 shadow-[0_25px_80px_rgba(0,0,0,0.55)]">
-                <img src="${escapeHtml(m.img)}" alt="${escapeHtml(m.name)}" class="w-full h-[380px] object-cover transform scale-[1.06]" style="object-position: 50% 20%;" />
+                <img src="${escapeHtml(m.img)}" alt="${escapeHtml(m.name)}" class="w-full h-auto max-h-[520px] object-contain" />
               </div>
 
               <div class="w-full max-w-[320px] flex items-center gap-3 text-white/80">
