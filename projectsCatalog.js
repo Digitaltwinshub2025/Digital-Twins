@@ -114,6 +114,7 @@ window.PROJECTS_CATALOG = [
     team: {
       members: [
         { name: 'Mario', role: 'Lead Developer' },
+        { name: 'Monique Nogueira', role: 'Architecture & Interior Design' },
         { name: 'Design Team', role: 'UI/UX Design' },
         { name: 'Data Science', role: 'Analytics' }
       ],
