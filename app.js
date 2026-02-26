@@ -88,7 +88,6 @@
       ],
       skills: ["Autocad", "Revit (student)", "Promob", "AURA", "ArchGIS", "Rhino (Student)"],
       experience: [
-        "Team member on the USGBC Resilient & Rebuilding Guide digital twin project.",
         "Architect and interior designer with project experience in furniture design and renovation work.",
         "Lighting design work supported by postgraduate training (EBAC – 2024).",
         "Site coordination and design development experience across multi-phase projects.",
@@ -1813,6 +1812,10 @@
         const ownerRaw = String(p?.owner || "").trim();
         const byNameRaw = `${String(p?.teamMemberFirstName || "").trim()} ${String(p?.teamMemberLastName || "").trim()}`.trim();
 
+        const teamMemberNames = (Array.isArray(p?.team?.members) ? p.team.members : [])
+          .map((tm) => String(tm?.name || "").trim())
+          .filter(Boolean);
+
         const owner = ownerRaw.toLowerCase();
         const byName = byNameRaw.toLowerCase();
 
@@ -1832,7 +1835,16 @@
           (byName && needleFirst && byName.includes(needleFirst)) ||
           (byName && needleLast && byName.includes(needleLast));
 
-        return ownerMatches || byNameMatches;
+        const teamMembersMatch = teamMemberNames.some((nm) => {
+          const n = nm.toLowerCase();
+          return (
+            (n && needleFull && n === needleFull) ||
+            (n && needleFirst && n.includes(needleFirst)) ||
+            (n && needleLast && n.includes(needleLast))
+          );
+        });
+
+        return ownerMatches || byNameMatches || teamMembersMatch;
       })
       .map((p) => {
         const img = p?.image ? String(p.image).replace(/^\//, "") : "";
