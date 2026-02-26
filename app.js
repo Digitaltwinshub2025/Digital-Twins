@@ -554,6 +554,15 @@
                           ${escapeHtml(project.summary || project.goal || "A featured project from the Digital Twins hub.")}
                         </p>
 
+                        ${
+                          project.videoUrl
+                            ? `<a href="${escapeHtml(project.videoUrl)}" target="_blank" rel="noreferrer"
+                                class="inline-flex items-center text-sm text-white/80 hover:text-white underline-offset-4 hover:underline">
+                                Watch video
+                              </a>`
+                            : ""
+                        }
+
                         <div class="mt-2 flex items-center justify-between gap-3 text-sm text-white/70">
                           ${
                             pid
@@ -1445,6 +1454,17 @@
               ${p.description ? previewCard("Overview", renderTextBlock(p.description)) : ""}
               ${p.goal ? previewCard("Goal", renderTextBlock(p.goal)) : ""}
               ${p.structureCapabilities ? previewCard("Structure & Capabilities", renderTextBlock(p.structureCapabilities)) : ""}
+
+              ${
+                p.videoEmbedUrl
+                  ? previewCard(
+                      "Video",
+                      `<div class="aspect-video w-full overflow-hidden rounded-xl bg-black/5 border border-black/10">
+                        <iframe class="w-full h-full" src="${escapeHtml(String(p.videoEmbedUrl))}" allow="autoplay" allowfullscreen></iframe>
+                      </div>`
+                    )
+                  : ""
+              }
 
               ${p.techStack ? previewCard("Technical Stack", renderTechStack(p.techStack)) : ""}
               ${Array.isArray(p.features) && p.features.length ? previewCard("Key Features", renderFeatures(p.features)) : ""}
