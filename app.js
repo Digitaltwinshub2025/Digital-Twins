@@ -15,7 +15,7 @@
     {
       name: "Omid Ahmadi",
       role: "Software Engineer • Project Lead",
-      img: "Team Members/Omid-Ahmadi.jpg.jpeg",
+      img: "Team Members/Omid-Ahmadi.jpeg",
       slug: "omid-ahmadi",
       sortOrder: 1,
       bio:
@@ -70,7 +70,7 @@
       img: "Team Members/Monique%20Nogueira.jpg",
       slug: "monique-nogueira",
       sortOrder: 3,
-      cardObjectPosition: "50% 8%",
+      cardObjectPosition: "80% 50%",
       bio:
         "I am an Brazilian architect and interior designer with nearly 10 years of experience in furniture design, renovation projects, lighting design, and site management. Since moving to the United States, my perspective on architecture has expanded, inspiring me to focus on environmental and sustainable design. My experience in the Summer Internship confirmed how architecture can be a powerful tool to make the world a better place. I am passionate about creating functional and inspiring spaces while embracing new opportunities to contribute to a more sustainable future.",
       highlights: [
@@ -98,7 +98,7 @@
       img: "Team Members/Saron%20Feyisa.png",
       slug: "saron-feyisa",
       sortOrder: 4,
-      cardObjectPosition: "50% 30%",
+      cardObjectPosition: "20% 10%",
       bio:
         "SQL & Web Support Specialist with experience managing SQL Server databases and building reporting and analytics workflows that improve performance, data integrity, and operational visibility. Skilled in T-SQL development, ETL/integration, automation, and dashboarding for business and technical stakeholders.",
       highlights: [
@@ -1772,7 +1772,7 @@
               <a href="#/team/${encodeURIComponent(m.slug)}" class="block">
                 <div class="group relative bg-white/5 rounded-3xl backdrop-blur-[1px] overflow-hidden transition-transform transition-shadow duration-300 hover:-translate-y-1 hover:shadow-xl">
                   <img src="${escapeHtml(m.img)}" alt="${escapeHtml(m.name)}"
-                    class="w-full h-60 object-cover transform scale-[1.1] transition-transform duration-500 group-hover:scale-[1.15]" style="object-position: ${escapeHtml(m.cardObjectPosition || "50% 20%")};" />
+                    class="w-full h-60 object-cover transform scale-[0.9] transition-transform duration-500 group-hover:scale-[1.15]" style="object-position: ${escapeHtml(m.cardObjectPosition || "50% 20%")};" />
                   <div class="p-4">
                     <div class="text-white text-2xl" style="font-family:Poppins, ui-sans-serif">${escapeHtml(m.name)}</div>
                     <div class="text-white/60 text-base leading-8" style="font-family:Poppins, ui-sans-serif">${escapeHtml(m.role)}</div>
