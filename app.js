@@ -229,6 +229,13 @@
     }, 3200);
   }
 
+  function withAutoplayParam(url) {
+    const raw = String(url || "").trim();
+    if (!raw) return "";
+    if (/([?&])autoplay=/.test(raw)) return raw;
+    return raw + (raw.includes("?") ? "&" : "?") + "autoplay=1";
+  }
+
   function applyEnterTextAnimations() {
     if (!appEl) return;
 
@@ -602,7 +609,7 @@
               <div class="aspect-video bg-black">
                 ${
                   pom && pom.videoEmbedUrl
-                    ? `<iframe class="w-full h-full" src="${escapeHtml(String(pom.videoEmbedUrl))}" allow="autoplay" allowfullscreen></iframe>`
+                    ? `<iframe class="w-full h-full" src="${escapeHtml(withAutoplayParam(String(pom.videoEmbedUrl)))}" allow="autoplay; fullscreen" allowfullscreen></iframe>`
                     : pom && pom.videoUrl
                       ? `<a href="${escapeHtml(String(pom.videoUrl))}" target="_blank" rel="noreferrer" class="w-full h-full flex items-center justify-center text-white/80 hover:text-white underline-offset-4 hover:underline" style="font-family:Poppins, ui-sans-serif">Watch video</a>`
                       : `<div class="w-full h-full flex items-center justify-center text-white/60" style="font-family:Poppins, ui-sans-serif">No video available</div>`
@@ -1468,7 +1475,7 @@
                   ? previewCard(
                       "Video",
                       `<div class="aspect-video w-full overflow-hidden rounded-xl bg-black/5 border border-black/10">
-                        <iframe class="w-full h-full" src="${escapeHtml(String(p.videoEmbedUrl))}" allow="autoplay" allowfullscreen></iframe>
+                        <iframe class="w-full h-full" src="${escapeHtml(withAutoplayParam(String(p.videoEmbedUrl)))}" allow="autoplay; fullscreen" allowfullscreen></iframe>
                       </div>`
                     )
                   : ""
