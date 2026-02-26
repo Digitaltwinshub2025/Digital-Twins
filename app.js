@@ -158,6 +158,16 @@
         "Contribute to digital twin platforms through web development, API integrations, system troubleshooting, and usability improvements.",
       ],
     },
+    {
+      name: "Myisha Arellano",
+      role: "Public Artist",
+      img: "Team Members/Myisha%20Arellano.jpeg",
+      slug: "myisha-arellano",
+      sortOrder: 6,
+      bio:
+        "Myisha Arellano is a Los Angeles–based public artist whose work since 2010 has brought murals to both commercial and community spaces across Southern California. Their practice is grounded in site-specific storytelling and community collaboration, leading to partnerships with organizations ranging from arts institutions and housing developers to grassroots collectives and universities.",
+      experience: ["Team member on the Baldwin Hills 6-Mile Corridor Initiative."],
+    },
     { name: "Priya N", role: "Systems", img: "https://placehold.co/254x240", slug: "priya-n" },
     { name: "John Appleseed", role: "Architecture", img: "https://placehold.co/254x240", slug: "john-appleseed" },
   ];
@@ -234,6 +244,14 @@
     if (!raw) return "";
     if (/([?&])autoplay=/.test(raw)) return raw;
     return raw + (raw.includes("?") ? "&" : "?") + "autoplay=1";
+  }
+
+  function driveDirectVideoUrl(url) {
+    const raw = String(url || "").trim();
+    if (!raw) return "";
+    const m = raw.match(/drive\.google\.com\/file\/d\/([^/]+)\//i);
+    if (!m) return "";
+    return `https://drive.google.com/uc?export=download&id=${encodeURIComponent(m[1])}`;
   }
 
   function applyEnterTextAnimations() {
@@ -609,9 +627,21 @@
               <div class="aspect-video bg-black">
                 ${
                   pom && pom.videoEmbedUrl
-                    ? `<iframe class="w-full h-full" src="${escapeHtml(withAutoplayParam(String(pom.videoEmbedUrl)))}" allow="autoplay; fullscreen" allowfullscreen></iframe>`
+                    ? (() => {
+                        const direct = driveDirectVideoUrl(pom.videoEmbedUrl);
+                        if (direct) {
+                          return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}"></video>`;
+                        }
+                        return `<iframe class="w-full h-full" src="${escapeHtml(withAutoplayParam(String(pom.videoEmbedUrl)))}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+                      })()
                     : pom && pom.videoUrl
-                      ? `<a href="${escapeHtml(String(pom.videoUrl))}" target="_blank" rel="noreferrer" class="w-full h-full flex items-center justify-center text-white/80 hover:text-white underline-offset-4 hover:underline" style="font-family:Poppins, ui-sans-serif">Watch video</a>`
+                      ? (() => {
+                          const direct = driveDirectVideoUrl(pom.videoUrl);
+                          if (direct) {
+                            return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}"></video>`;
+                          }
+                          return `<a href="${escapeHtml(String(pom.videoUrl))}" target="_blank" rel="noreferrer" class="w-full h-full flex items-center justify-center text-white/80 hover:text-white underline-offset-4 hover:underline" style="font-family:Poppins, ui-sans-serif">Watch video</a>`;
+                        })()
                       : `<div class="w-full h-full flex items-center justify-center text-white/60" style="font-family:Poppins, ui-sans-serif">No video available</div>`
                 }
               </div>
@@ -1475,7 +1505,13 @@
                   ? previewCard(
                       "Video",
                       `<div class="aspect-video w-full overflow-hidden rounded-xl bg-black/5 border border-black/10">
-                        <iframe class="w-full h-full" src="${escapeHtml(withAutoplayParam(String(p.videoEmbedUrl)))}" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                        ${(() => {
+                          const direct = driveDirectVideoUrl(p.videoEmbedUrl);
+                          if (direct) {
+                            return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}"></video>`;
+                          }
+                          return `<iframe class="w-full h-full" src="${escapeHtml(withAutoplayParam(String(p.videoEmbedUrl)))}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+                        })()}
                       </div>`
                     )
                   : ""
