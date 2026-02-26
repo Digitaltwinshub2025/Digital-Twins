@@ -70,7 +70,7 @@
       img: "Team Members/Monique%20Nogueira.jpg",
       slug: "monique-nogueira",
       sortOrder: 3,
-      cardObjectPosition: "50% 10%",
+      cardObjectPosition: "50% 5%",
       bio:
         "I am an Brazilian architect and interior designer with nearly 10 years of experience in furniture design, renovation projects, lighting design, and site management. Since moving to the United States, my perspective on architecture has expanded, inspiring me to focus on environmental and sustainable design. My experience in the Summer Internship confirmed how architecture can be a powerful tool to make the world a better place. I am passionate about creating functional and inspiring spaces while embracing new opportunities to contribute to a more sustainable future.",
       highlights: [
