@@ -333,6 +333,13 @@ window.PROJECTS_CATALOG = [
       'Geospatial Data – maps and site context\n' +
       '3D Model Data – Unreal Engine and Grasshopper outputs\n' +
       'Environmental & Planning Metrics – visualized through Power BI dashboards',
+    team: {
+      members: [
+        { name: 'Saron Feyisa', role: 'Software Engineer — platform development, mapping, and integration' },
+        { name: 'Monica Kaye', role: 'UX & Visual Design — research-driven interface and communication design' },
+      ],
+      collaboration: [],
+    },
     conclusion:
       'Shade LA is a multidisciplinary platform that merges software engineering, spatial analysis, and design visualization to support urban shade planning. By presenting complex data and design concepts in an accessible, interactive format, the project contributes to climate-resilient and people-centered urban environments.',
   },
