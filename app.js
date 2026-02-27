@@ -622,7 +622,9 @@
     const mostRecentWithVideo = [...catalog]
       .reverse()
       .find((p) => p && (p.videoEmbedUrl || p.videoUrl));
-    state.home.projectOfMonth = mostRecentWithVideo || shuffled[0] || null;
+
+    const baldwinHills = catalog.find((p) => p && String(p.id) === "02") || null;
+    state.home.projectOfMonth = baldwinHills || mostRecentWithVideo || shuffled[0] || null;
   }
 
   function homeLeaders() {
@@ -774,8 +776,10 @@
                 </span>
               </div>
 
-              <div class="aspect-video bg-gray-100 flex items-center justify-center text-gray-500 text-sm" style="font-family:Poppins, ui-sans-serif">
-                Video removed
+              <div class="aspect-video bg-black">
+                <video class="w-full h-full" autoplay muted playsinline loop controls>
+                  <source src="Featured Projects/Baldwin Hills.mp4" type="video/mp4" />
+                </video>
               </div>
 
               <div class="px-6 py-5 space-y-3 text-sm md:text-base" style="font-family:Poppins, ui-sans-serif, system-ui">
