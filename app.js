@@ -265,6 +265,20 @@
       const parent = videoEl.parentElement;
       if (!parent) return;
 
+      const isDrive = /(^|\.)drive\.google\.com\//i.test(embedUrl);
+      if (isDrive) {
+        parent.innerHTML = `
+          <div class="w-full h-full flex items-center justify-center bg-black">
+            <a href="${escapeHtml(embedUrl)}" target="_blank" rel="noreferrer"
+              class="rounded-full bg-white px-4 py-2 text-sm text-black hover:bg-white/90"
+              style="font-family:Poppins, ui-sans-serif">
+              Open video in new tab
+            </a>
+          </div>
+        `;
+        return;
+      }
+
       parent.innerHTML = `<iframe class="w-full h-full" src="${escapeHtml(withAutoplayParam(embedUrl))}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
     } catch (_) {
       // no-op
