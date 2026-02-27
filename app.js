@@ -1514,6 +1514,35 @@
     const img = getProjectImage(p);
     const pid = p && p.id != null ? String(p.id) : "";
     const localCardVideoSrc = pid === "02" ? "Featured Projects/Baldwin Hills.mp4" : "";
+
+    const cardTeamNames = (() => {
+      const names = [];
+      const tmFirst = String(p?.teamMemberFirstName || "").trim();
+      const tmLast = String(p?.teamMemberLastName || "").trim();
+      const tmFull = `${tmFirst} ${tmLast}`.trim();
+      if (tmFull) names.push(tmFull);
+
+      const teamMembers = Array.isArray(p?.team?.members) ? p.team.members : [];
+      teamMembers.forEach((m) => {
+        const n = String(m?.name || "").trim();
+        if (n) names.push(n);
+      });
+
+      const seen = new Set();
+      const deduped = [];
+      names.forEach((n) => {
+        const key = n.toLowerCase();
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        deduped.push(n);
+      });
+      return deduped;
+    })();
+
+    const cardTeamPreviewMax = 3;
+    const cardTeamPreview = cardTeamNames.slice(0, cardTeamPreviewMax);
+    const cardTeamRemaining = Math.max(0, cardTeamNames.length - cardTeamPreview.length);
+
     return `
       <div data-open-preview="${escapeHtml(String(p.id))}"
         class="group relative rounded-2xl bg-white/60 backdrop-blur-sm overflow-hidden cursor-pointer transition-transform transition-shadow duration-300 hover:-translate-y-1 hover:shadow-xl"
@@ -1542,6 +1571,13 @@
             p.teamMemberFirstName
               ? `<div class="mt-1 text-xs text-black/70" style="font-family: Istok Web, Poppins, ui-sans-serif">
                   Team Member: ${escapeHtml(p.teamMemberFirstName)} ${escapeHtml(p.teamMemberLastName || "")}${p.teamMemberRole ? ` • ${escapeHtml(p.teamMemberRole)}` : ""}
+                </div>`
+              : ""
+          }
+          ${
+            cardTeamNames.length
+              ? `<div class="mt-1 text-xs text-black/70" style="font-family: Istok Web, Poppins, ui-sans-serif">
+                  Team: ${escapeHtml(cardTeamPreview.join(", "))}${cardTeamRemaining ? ` +${cardTeamRemaining} more` : ""}
                 </div>`
               : ""
           }
