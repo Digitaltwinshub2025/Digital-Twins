@@ -222,6 +222,7 @@
       img: "Team Members/Monica%20Kaye.jpeg",
       slug: "monica-kaye",
       sortOrder: 8,
+      cardObjectPosition: "50% 25%",
       bio:
         "Monica Kaye is a multidisciplinary designer blending UX, visual design, and environmental research. With a background in movement, wellness, and the arts, she approaches climate and spatial challenges through a human-centered, systems-thinking lens. Her work is driven by curiosity, creativity, and a deep commitment to improving lives through thoughtful, research-driven design",
       experience: ["Team member on Shade LA."],
