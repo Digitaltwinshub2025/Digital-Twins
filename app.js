@@ -254,6 +254,24 @@
     return `https://drive.google.com/uc?export=download&id=${encodeURIComponent(m[1])}`;
   }
 
+  function isDriveUrl(url) {
+    return /(^|\.)drive\.google\.com\//i.test(String(url || "").trim());
+  }
+
+  function driveOpenInNewTabCta(url) {
+    const u = String(url || "").trim();
+    if (!u) return "";
+    return `
+      <div class="w-full h-full flex items-center justify-center bg-black">
+        <a href="${escapeHtml(u)}" target="_blank" rel="noreferrer"
+          class="rounded-full bg-white px-4 py-2 text-sm text-black hover:bg-white/90"
+          style="font-family:Poppins, ui-sans-serif">
+          Open video in new tab
+        </a>
+      </div>
+    `;
+  }
+
   window.__dtVideoFallback = function (videoEl) {
     try {
       if (!videoEl || videoEl.dataset?.fallbackApplied === "1") return;
@@ -712,6 +730,9 @@
                 ${
                   pom && pom.videoEmbedUrl
                     ? (() => {
+                        if (isDriveUrl(pom.videoEmbedUrl)) {
+                          return driveOpenInNewTabCta(pom.videoEmbedUrl);
+                        }
                         const direct = driveDirectVideoUrl(pom.videoEmbedUrl);
                         if (direct) {
                           return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}" data-embed-url="${escapeHtml(String(pom.videoEmbedUrl))}" onloadstart="window.__dtVideoWatchdog(this)" onloadeddata="window.__dtVideoClearWatchdog(this)" oncanplay="window.__dtVideoClearWatchdog(this)" onerror="window.__dtVideoFallback(this)"></video>`;
@@ -720,6 +741,9 @@
                       })()
                     : pom && pom.videoUrl
                       ? (() => {
+                          if (isDriveUrl(pom.videoUrl)) {
+                            return driveOpenInNewTabCta(pom.videoUrl);
+                          }
                           const direct = driveDirectVideoUrl(pom.videoUrl);
                           if (direct) {
                             return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}" data-embed-url="${escapeHtml(String(pom.videoUrl))}" onloadstart="window.__dtVideoWatchdog(this)" onloadeddata="window.__dtVideoClearWatchdog(this)" oncanplay="window.__dtVideoClearWatchdog(this)" onerror="window.__dtVideoFallback(this)"></video>`;
@@ -1590,6 +1614,9 @@
                       "Video",
                       `<div class="aspect-video w-full overflow-hidden rounded-xl bg-black/5 border border-black/10">
                         ${(() => {
+                          if (isDriveUrl(p.videoEmbedUrl)) {
+                            return driveOpenInNewTabCta(p.videoEmbedUrl);
+                          }
                           const direct = driveDirectVideoUrl(p.videoEmbedUrl);
                           if (direct) {
                             return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}" data-embed-url="${escapeHtml(String(p.videoEmbedUrl))}" onloadstart="window.__dtVideoWatchdog(this)" onloadeddata="window.__dtVideoClearWatchdog(this)" oncanplay="window.__dtVideoClearWatchdog(this)" onerror="window.__dtVideoFallback(this)"></video>`;
