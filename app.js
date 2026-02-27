@@ -271,6 +271,45 @@
     }
   };
 
+  window.__dtVideoWatchdog = function (videoEl) {
+    try {
+      if (!videoEl || videoEl.dataset?.watchdogSet === "1") return;
+      videoEl.dataset.watchdogSet = "1";
+
+      const timeoutMs = 6000;
+      const id = setTimeout(() => {
+        try {
+          if (!videoEl) return;
+          if (videoEl.dataset?.fallbackApplied === "1") return;
+
+          const rs = Number(videoEl.readyState || 0);
+          const isReallyPlaying = !videoEl.paused && !videoEl.ended;
+
+          if (rs < 2 && !isReallyPlaying) {
+            window.__dtVideoFallback(videoEl);
+          }
+        } catch (_) {
+          // no-op
+        }
+      }, timeoutMs);
+
+      videoEl.dataset.watchdogId = String(id);
+    } catch (_) {
+      // no-op
+    }
+  };
+
+  window.__dtVideoClearWatchdog = function (videoEl) {
+    try {
+      const idRaw = videoEl?.dataset?.watchdogId;
+      if (!idRaw) return;
+      clearTimeout(Number(idRaw));
+      delete videoEl.dataset.watchdogId;
+    } catch (_) {
+      // no-op
+    }
+  };
+
   function applyEnterTextAnimations() {
     if (!appEl) return;
 
@@ -647,7 +686,7 @@
                     ? (() => {
                         const direct = driveDirectVideoUrl(pom.videoEmbedUrl);
                         if (direct) {
-                          return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}" data-embed-url="${escapeHtml(String(pom.videoEmbedUrl))}" onerror="window.__dtVideoFallback(this)"></video>`;
+                          return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}" data-embed-url="${escapeHtml(String(pom.videoEmbedUrl))}" onloadstart="window.__dtVideoWatchdog(this)" onloadeddata="window.__dtVideoClearWatchdog(this)" oncanplay="window.__dtVideoClearWatchdog(this)" onerror="window.__dtVideoFallback(this)"></video>`;
                         }
                         return `<iframe class="w-full h-full" src="${escapeHtml(withAutoplayParam(String(pom.videoEmbedUrl)))}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
                       })()
@@ -655,7 +694,7 @@
                       ? (() => {
                           const direct = driveDirectVideoUrl(pom.videoUrl);
                           if (direct) {
-                            return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}" data-embed-url="${escapeHtml(String(pom.videoUrl))}" onerror="window.__dtVideoFallback(this)"></video>`;
+                            return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}" data-embed-url="${escapeHtml(String(pom.videoUrl))}" onloadstart="window.__dtVideoWatchdog(this)" onloadeddata="window.__dtVideoClearWatchdog(this)" oncanplay="window.__dtVideoClearWatchdog(this)" onerror="window.__dtVideoFallback(this)"></video>`;
                           }
                           return `<a href="${escapeHtml(String(pom.videoUrl))}" target="_blank" rel="noreferrer" class="w-full h-full flex items-center justify-center text-white/80 hover:text-white underline-offset-4 hover:underline" style="font-family:Poppins, ui-sans-serif">Watch video</a>`;
                         })()
@@ -1525,7 +1564,7 @@
                         ${(() => {
                           const direct = driveDirectVideoUrl(p.videoEmbedUrl);
                           if (direct) {
-                            return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}" data-embed-url="${escapeHtml(String(p.videoEmbedUrl))}" onerror="window.__dtVideoFallback(this)"></video>`;
+                            return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}" data-embed-url="${escapeHtml(String(p.videoEmbedUrl))}" onloadstart="window.__dtVideoWatchdog(this)" onloadeddata="window.__dtVideoClearWatchdog(this)" oncanplay="window.__dtVideoClearWatchdog(this)" onerror="window.__dtVideoFallback(this)"></video>`;
                           }
                           return `<iframe class="w-full h-full" src="${escapeHtml(withAutoplayParam(String(p.videoEmbedUrl)))}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
                         })()}
