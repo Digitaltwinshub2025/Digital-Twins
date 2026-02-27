@@ -2072,7 +2072,7 @@
     ];
 
     const csSlugs = new Set(["omid-ahmadi", "mario-chong-loo", "saron-feyisa", "michael-lee"]);
-    const archSlugs = new Set(["monique-nogueira", "myisha-arellano", "yiceth-cosby", "monica-kaye"]);
+    const archSlugs = new Set(["monique-nogueira", "myisha-arellano", "yiceth-cosby", "monica-kaye", "brenda-cardoza"]);
     const filteredMembers = members.filter((m) => {
       const slug = String(m?.slug || "");
       if (filterKey === "cs") return csSlugs.has(slug);
