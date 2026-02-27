@@ -253,6 +253,7 @@
       searchTerm: "",
       previewingId: null,
       showEmbeddedProject: false,
+      teamFilter: "all",
       teamMembers: [...FALLBACK_MEMBERS],
     },
     // Learning hub
@@ -2002,9 +2003,24 @@
   // -----------------------------
   function renderTeamPage() {
     const mountedClass = state.projectsPage.mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4";
-    const filters = ["All", "Computer Science", "Architects"];
     const members = Array.isArray(state.projectsPage.teamMembers) ? state.projectsPage.teamMembers : [];
-    const sortedMembers = [...members].sort((a, b) => {
+    const filterKey = String(state.projectsPage.teamFilter || "all");
+    const filterOptions = [
+      { key: "all", label: "All" },
+      { key: "cs", label: "Computer Science" },
+      { key: "arch", label: "Architects" },
+    ];
+
+    const csSlugs = new Set(["omid-ahmadi", "mario-chong-loo", "saron-feyisa", "michael-lee"]);
+    const archSlugs = new Set(["monique-nogueira", "myisha-arellano", "yiceth-cosby", "monica-kaye"]);
+    const filteredMembers = members.filter((m) => {
+      const slug = String(m?.slug || "");
+      if (filterKey === "cs") return csSlugs.has(slug);
+      if (filterKey === "arch") return archSlugs.has(slug);
+      return true;
+    });
+
+    const sortedMembers = [...filteredMembers].sort((a, b) => {
       const aOrder = Number.isFinite(Number(a?.sortOrder)) ? Number(a.sortOrder) : Number.POSITIVE_INFINITY;
       const bOrder = Number.isFinite(Number(b?.sortOrder)) ? Number(b.sortOrder) : Number.POSITIVE_INFINITY;
       if (aOrder !== bOrder) return aOrder - bOrder;
@@ -2021,12 +2037,13 @@
           </div>
 
           <div class="mt-10 flex items-center gap-4 justify-center">
-            ${filters
+            ${filterOptions
               .map(
-                (f, i) => `
-              <button class="px-6 py-2 rounded-full ${i === 0 ? "bg-black text-white" : "bg-white/40 text-black"} shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)]"
+                (opt) => `
+              <button data-team-filter="${escapeHtml(opt.key)}"
+                class="px-6 py-2 rounded-full ${opt.key === filterKey ? "bg-black text-white" : "bg-white/40 text-black"} shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)]"
                 style="font-family:Poppins, ui-sans-serif; font-size:20px">
-                ${escapeHtml(f)}
+                ${escapeHtml(opt.label)}
               </button>
             `
               )
@@ -2056,6 +2073,14 @@
         </section>
       </div>
     `;
+
+    document.querySelectorAll("[data-team-filter]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const key = String(e.currentTarget?.getAttribute("data-team-filter") || "all");
+        state.projectsPage.teamFilter = key;
+        renderTeamPage();
+      });
+    });
   }
 
   function renderTeamMember(slug) {
