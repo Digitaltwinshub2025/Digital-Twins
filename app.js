@@ -67,7 +67,7 @@
     },
     {
       name: "Monique Nogueira",
-      role: "Architect & Interior Designer",
+      role: "Architecture Designer",
       img: "Team Members/Monique%20Nogueira.jpg",
       slug: "monique-nogueira",
       sortOrder: 3,
@@ -129,7 +129,7 @@
     },
     {
       name: "Michael Lee",
-      role: "Software Engineer (Intern) · PUHC Innovation Alleys",
+      role: "Software Engineer (Intern)",
       img: "Team Members/Michael%20Lee.jfif",
       slug: "michael-lee",
       sortOrder: 5,
@@ -160,7 +160,7 @@
     },
     {
       name: "Myisha Arellano",
-      role: "Public Artist",
+      role: "Digital and scenic Artist",
       img: "Team Members/Myisha%20Arellano.jpeg",
       slug: "myisha-arellano",
       sortOrder: 6,
@@ -170,7 +170,7 @@
     },
     {
       name: "Yiceth Cosby",
-      role: "Mechanical, Environmental & XR Designer | Digital Twin Modeling",
+      role: "Mechanical, Environmental & XR Designer",
       img: "Team Members/Yiceth%20Cosby.png",
       slug: "yiceth-cosby",
       sortOrder: 7,
