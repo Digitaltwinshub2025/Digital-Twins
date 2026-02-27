@@ -1510,15 +1510,21 @@
 
   function renderProjectCard(p) {
     const img = getProjectImage(p);
+    const pid = p && p.id != null ? String(p.id) : "";
+    const localCardVideoSrc = pid === "02" ? "Featured Projects/Baldwin Hills.mp4" : "";
     return `
       <div data-open-preview="${escapeHtml(String(p.id))}"
         class="group relative rounded-2xl bg-white/60 backdrop-blur-sm overflow-hidden cursor-pointer transition-transform transition-shadow duration-300 hover:-translate-y-1 hover:shadow-xl"
         style="box-shadow: inset 0 4px 6px rgba(255,255,255,0.6);">
         <div class="h-44 w-full overflow-hidden bg-white/40 flex items-center justify-center text-black/50">
           ${
-            img
-              ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(p.title || "project image")}" class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-105" />`
-              : "No image"
+            localCardVideoSrc
+              ? `<video class="w-full h-full object-cover pointer-events-none" autoplay muted playsinline loop preload="metadata">
+                  <source src="${escapeHtml(localCardVideoSrc)}" type="video/mp4" />
+                </video>`
+              : img
+                ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(p.title || "project image")}" class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-105" />`
+                : "No image"
           }
         </div>
         <div class="p-5">
