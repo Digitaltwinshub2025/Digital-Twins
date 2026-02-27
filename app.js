@@ -227,6 +227,16 @@
         "Monica Kaye is a multidisciplinary designer blending UX, visual design, and environmental research. With a background in movement, wellness, and the arts, she approaches climate and spatial challenges through a human-centered, systems-thinking lens. Her work is driven by curiosity, creativity, and a deep commitment to improving lives through thoughtful, research-driven design",
       experience: ["Team member on Shade LA."],
     },
+    {
+      name: "Brenda Cardoza",
+      role: "Interior design student",
+      img: "Team Members/Brenda%20Cardoza.png",
+      slug: "brenda-cardoza",
+      sortOrder: 9,
+      bio:
+        "Brenda Cardoza is an interior design student at California State University, Northridge and an emerging designer with experience in community-focused design and digital modeling. Through her internship, she has contributed to urban revitalization projects, site analysis, and the development of design concepts using tools such as Rhino, Unreal Engine, and GIS. Her academic training includes space planning, sustainable materials, and human-centered design principles, which she applies to create functional, thoughtful environments. Brenda is particularly interested in commercial and hospitality design and aims to develop spaces that enhance both experience and usability",
+      experience: ["Team member on Alley Bloom."],
+    },
     { name: "Priya N", role: "Systems", img: "https://placehold.co/254x240", slug: "priya-n" },
     { name: "John Appleseed", role: "Architecture", img: "https://placehold.co/254x240", slug: "john-appleseed" },
   ];
