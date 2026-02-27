@@ -1565,6 +1565,7 @@
 
   function renderProjectPreviewModal(p) {
     const img = getProjectImage(p);
+    const pid = p && p.id != null ? String(p.id) : "";
     const embed = state.projectsPage.showEmbeddedProject && p.repoUrl;
 
     const previewSummary =
@@ -1659,8 +1660,13 @@
                       "Video",
                       `<div class="aspect-video w-full overflow-hidden rounded-xl bg-black/5 border border-black/10">
                         ${(() => {
+                          if (pid === "02") {
+                            return `<video class="w-full h-full" autoplay muted loop playsinline controls>
+                              <source src="Featured Projects/Baldwin Hills.mp4" type="video/mp4" />
+                            </video>`;
+                          }
                           if (isDriveUrl(p.videoEmbedUrl)) {
-                            return `<iframe class="w-full h-full" src="${escapeHtml(withAutoplayParam(String(p.videoEmbedUrl)))}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+                            return driveOpenInNewTabCta(p.videoEmbedUrl);
                           }
                           const direct = driveDirectVideoUrl(p.videoEmbedUrl);
                           if (direct) {
