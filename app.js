@@ -1490,22 +1490,6 @@
       const p = state.projectsPage.previewingId ? getProjectById(state.projectsPage.previewingId) : null;
       if (p) exportPDF(p);
     });
-    document.getElementById("launchEmbedBtn")?.addEventListener("click", () => {
-      state.projectsPage.showEmbeddedProject = true;
-      render();
-    });
-
-    // Preserve preview scroll position
-    if (previewing) {
-      const key = `dt_preview_scroll_${previewing.id}`;
-      const modalScroll = document.getElementById("previewScroll");
-      if (modalScroll) {
-        modalScroll.scrollTop = Number(localStorage.getItem(key) || 0);
-        modalScroll.addEventListener("scroll", () => {
-          localStorage.setItem(key, String(modalScroll.scrollTop));
-        });
-      }
-    }
 
     // If URL has ?id=, open it once
     const qs = new URLSearchParams(location.hash.split("?")[1] || "");
@@ -1659,10 +1643,6 @@
                            class="inline-flex items-center justify-center rounded-full bg-black text-white px-3 py-1 text-[11px] sm:text-xs hover:bg-black/90">
                           Open in Browser
                         </a>
-                        <button id="launchEmbedBtn" type="button"
-                          class="mt-2 sm:mt-0 inline-flex items-center justify-center rounded-full bg-black text-white px-3 py-1 text-[11px] sm:text-xs hover:bg-black/90">
-                          Launch project
-                        </button>
                       </div>
                     `
                       : ""
@@ -1861,10 +1841,6 @@
                   <a href="${escapeHtml(project.repoUrl)}" target="_blank" rel="noreferrer"
                     class="inline-flex items-center justify-center rounded-full bg-black text-white px-3 py-1 text-[11px] sm:text-xs hover:bg-black/90">
                     Open in Browser
-                  </a>
-                  <a href="${escapeHtml(project.repoUrl)}"
-                    class="mt-2 sm:mt-0 inline-flex items-center justify-center rounded-full bg-black text-white px-3 py-1 text-[11px] sm:text-xs hover:bg-black/90">
-                    Launch project
                   </a>
                 </div>`
               : ""
