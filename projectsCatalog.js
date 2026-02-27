@@ -492,6 +492,13 @@ window.PROJECTS_CATALOG = [
       'Spatial & Environmental Data – site conditions, existing vegetation, urban context.\n' +
       '3D & XR Models – digital twin files and immersive visualizations.\n' +
       'Community Input & Storytelling – qualitative data from stakeholders and community members.',
+    team: {
+      members: [
+        { name: 'Nancy', role: 'Architecture Engineer' },
+        { name: 'Yiceth Cosby', role: 'XR & Digital Twin Modeling' },
+      ],
+      collaboration: [],
+    },
     conclusion:
       'The ASU Reclamation Project is a collaborative initiative combining architecture, landscape design, community engagement, and digital technologies to reclaim urban spaces in Los Angeles. It balances technical analysis with social values, using 3D simulations and XR tools to guide equitable and inspiring urban transformation.',
   },
