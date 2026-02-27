@@ -1528,12 +1528,38 @@
         if (n) names.push(n);
       });
 
-      const seen = new Set();
+      const canonical = (s) =>
+        String(s || "")
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9\s]/g, "")
+          .replace(/\s+/g, " ");
+
+      const byPreferred = [...names]
+        .map((n) => String(n || "").trim())
+        .filter(Boolean)
+        .sort((a, b) => {
+          const aTokens = a.split(/\s+/).filter(Boolean).length;
+          const bTokens = b.split(/\s+/).filter(Boolean).length;
+          if (aTokens !== bTokens) return bTokens - aTokens;
+          return b.length - a.length;
+        });
+
+      const seenFull = new Set();
+      const seenFirst = new Set();
       const deduped = [];
-      names.forEach((n) => {
-        const key = n.toLowerCase();
-        if (!key || seen.has(key)) return;
-        seen.add(key);
+      byPreferred.forEach((n) => {
+        const key = canonical(n);
+        if (!key) return;
+        if (seenFull.has(key)) return;
+
+        const first = key.split(" ")[0] || "";
+        const isSingle = !key.includes(" ");
+
+        if (isSingle && first && seenFirst.has(first)) return;
+
+        seenFull.add(key);
+        if (first) seenFirst.add(first);
         deduped.push(n);
       });
       return deduped;
@@ -1567,13 +1593,6 @@
           <div class="mt-1 text-sm text-black" style="font-family: Istok Web, Poppins, ui-sans-serif">
             ${escapeHtml(p.category || "")}${p.owner ? ` • ${escapeHtml(p.owner)}` : ""}
           </div>
-          ${
-            p.teamMemberFirstName
-              ? `<div class="mt-1 text-xs text-black/70" style="font-family: Istok Web, Poppins, ui-sans-serif">
-                  Team Member: ${escapeHtml(p.teamMemberFirstName)} ${escapeHtml(p.teamMemberLastName || "")}${p.teamMemberRole ? ` • ${escapeHtml(p.teamMemberRole)}` : ""}
-                </div>`
-              : ""
-          }
           ${
             cardTeamNames.length
               ? `<div class="mt-1 text-xs text-black/70" style="font-family: Istok Web, Poppins, ui-sans-serif">
