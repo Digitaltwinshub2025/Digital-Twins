@@ -774,32 +774,8 @@
                 </span>
               </div>
 
-              <div class="aspect-video bg-black">
-                ${
-                  pom && pom.videoEmbedUrl
-                    ? (() => {
-                        if (isDriveUrl(pom.videoEmbedUrl)) {
-                          return driveOpenInNewTabCta(pom.videoEmbedUrl);
-                        }
-                        const direct = driveDirectVideoUrl(pom.videoEmbedUrl);
-                        if (direct) {
-                          return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}" data-embed-url="${escapeHtml(String(pom.videoEmbedUrl))}" onloadstart="window.__dtVideoWatchdog(this)" onloadeddata="window.__dtVideoClearWatchdog(this)" oncanplay="window.__dtVideoClearWatchdog(this)" onerror="window.__dtVideoFallback(this)"></video>`;
-                        }
-                        return `<iframe class="w-full h-full" src="${escapeHtml(withAutoplayParam(String(pom.videoEmbedUrl)))}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
-                      })()
-                    : pom && pom.videoUrl
-                      ? (() => {
-                          if (isDriveUrl(pom.videoUrl)) {
-                            return driveOpenInNewTabCta(pom.videoUrl);
-                          }
-                          const direct = driveDirectVideoUrl(pom.videoUrl);
-                          if (direct) {
-                            return `<video class="w-full h-full" autoplay muted loop playsinline controls src="${escapeHtml(direct)}" data-embed-url="${escapeHtml(String(pom.videoUrl))}" onloadstart="window.__dtVideoWatchdog(this)" onloadeddata="window.__dtVideoClearWatchdog(this)" oncanplay="window.__dtVideoClearWatchdog(this)" onerror="window.__dtVideoFallback(this)"></video>`;
-                          }
-                          return `<a href="${escapeHtml(String(pom.videoUrl))}" target="_blank" rel="noreferrer" class="w-full h-full flex items-center justify-center text-white/80 hover:text-white underline-offset-4 hover:underline" style="font-family:Poppins, ui-sans-serif">Watch video</a>`;
-                        })()
-                      : `<div class="w-full h-full flex items-center justify-center text-white/60" style="font-family:Poppins, ui-sans-serif">No video available</div>`
-                }
+              <div class="aspect-video bg-gray-100 flex items-center justify-center text-gray-500 text-sm" style="font-family:Poppins, ui-sans-serif">
+                Video removed
               </div>
 
               <div class="px-6 py-5 space-y-3 text-sm md:text-base" style="font-family:Poppins, ui-sans-serif, system-ui">
