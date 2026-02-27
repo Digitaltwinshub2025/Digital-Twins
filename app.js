@@ -1651,7 +1651,12 @@
                           }
                           return `<iframe class="w-full h-full" src="${escapeHtml(withAutoplayParam(String(p.videoEmbedUrl)))}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
                         })()}
-                      </div>`
+                      </div>
+                      <a href="${escapeHtml(String(p.videoEmbedUrl))}" target="_blank" rel="noreferrer"
+                        class="mt-2 inline-flex items-center text-sm text-black/70 hover:text-black underline-offset-4 hover:underline"
+                        style="font-family:Poppins, ui-sans-serif">
+                        Open video in new tab
+                      </a>`
                     )
                   : ""
               }
