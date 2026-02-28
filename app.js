@@ -247,6 +247,44 @@
         "Hello There I am a current Architectural Technology Designer and Alumni From Los Angeles Trade Tech College with Construction Background in Drywall and Framing. As Spatial relations and Design Principles quickly became an obsession I began to Interact with Software Programs Like Revit, Rhino, Arc GIS Pro, Adobe Apps, Unreal Engine, and Aura Engine as key tools Inside an Designer and Architects Arsenal. To Design for Humanity with Balanced Solutions and Interconnect with Computer Science Technology.",
       experience: ["Team member on Pando Populus."],
     },
+    {
+      name: "Volodymyr Balan",
+      role: "Backend Software Engineer",
+      img: "Team Members/Volodymyr%20Balan.jpeg",
+      slug: "volodymyr-balan",
+      sortOrder: 11,
+      bio:
+        "Building scalable web applications and RESTful APIs using Python and modern backend technologies.\n\nContributed to production Django-based systems, focusing on database modeling, authentication & authorization, API development, and performance optimization. Experienced working in remote engineering teams using Git-based workflows and Agile practices.",
+      education: ["Los Angeles Valley College — Computer Science (In Progress)"],
+      skills: [
+        "Python",
+        "Django",
+        "Django REST Framework (DRF)",
+        "FastAPI",
+        "Celery",
+        "PostgreSQL",
+        "MongoDB",
+        "SQLite",
+        "SQL",
+        "AWS (Cloud Practitioner)",
+        "Docker",
+        "Redis",
+        "Git",
+        "Linux",
+        "Postman",
+        "REST APIs",
+        "JSON",
+        "YAML",
+        "HTML",
+        "CSS",
+        "Database Modeling",
+        "Authentication & Authorization",
+        "API Design",
+        "Debugging",
+        "Technical Documentation",
+      ],
+      experience: ["Team member on Shade LA."],
+    },
     { name: "Priya N", role: "Systems", img: "https://placehold.co/254x240", slug: "priya-n" },
     { name: "John Appleseed", role: "Architecture", img: "https://placehold.co/254x240", slug: "john-appleseed" },
   ];
@@ -2057,7 +2095,7 @@
       { key: "arch", label: "Architects" },
     ];
 
-    const csSlugs = new Set(["omid-ahmadi", "mario-chong-loo", "saron-feyisa", "michael-lee"]);
+    const csSlugs = new Set(["omid-ahmadi", "mario-chong-loo", "saron-feyisa", "michael-lee", "volodymyr-balan"]);
     const archSlugs = new Set(["monique-nogueira", "myisha-arellano", "yiceth-cosby", "monica-kaye", "brenda-cardoza", "eddie-cortez"]);
     const filteredMembers = members.filter((m) => {
       const slug = String(m?.slug || "");

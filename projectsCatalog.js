@@ -337,6 +337,7 @@ window.PROJECTS_CATALOG = [
       members: [
         { name: 'Saron Feyisa', role: 'Software Engineer — platform development, mapping, and integration' },
         { name: 'Monica Kaye', role: 'UX & Visual Design — research-driven interface and communication design' },
+        { name: 'Volodymyr Balan', role: 'Backend Software Engineer — APIs, database modeling, and performance optimization' },
       ],
       collaboration: [],
     },
