@@ -421,6 +421,13 @@ window.PROJECTS_CATALOG = [
       'Environmental Data – heat, air quality indices.\n' +
       'Climate Risk Models – flood and wildfire risk layers.\n' +
       'Infrastructure Data – built environment, transit, open space.',
+    team: {
+      members: [
+        { name: 'Ed', role: 'Engineer' },
+        { name: 'Eddie Cortez', role: 'Architectural Technology Designer' },
+      ],
+      collaboration: [],
+    },
     conclusion:
       'Pando Populus is a robust digital twin platform tailored to environmental and community resilience. By synthesizing complex datasets into digestible insights, it empowers communities and planners to evaluate and address climate-related challenges with data-backed strategies.',
   },

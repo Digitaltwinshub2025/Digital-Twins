@@ -237,6 +237,16 @@
         "Brenda Cardoza is an interior design student at California State University, Northridge and an emerging designer with experience in community-focused design and digital modeling. Through her internship, she has contributed to urban revitalization projects, site analysis, and the development of design concepts using tools such as Rhino, Unreal Engine, and GIS. Her academic training includes space planning, sustainable materials, and human-centered design principles, which she applies to create functional, thoughtful environments. Brenda is particularly interested in commercial and hospitality design and aims to develop spaces that enhance both experience and usability",
       experience: ["Team member on Alley Bloom."],
     },
+    {
+      name: "Eddie Cortez",
+      role: "Architectural Technology Designer",
+      img: "Team Members/Eddie%20Cortez.jpeg",
+      slug: "eddie-cortez",
+      sortOrder: 10,
+      bio:
+        "Hello There I am a current Architectural Technology Designer and Alumni From Los Angeles Trade Tech College with Construction Background in Drywall and Framing. As Spatial relations and Design Principles quickly became an obsession I began to Interact with Software Programs Like Revit, Rhino, Arc GIS Pro, Adobe Apps, Unreal Engine, and Aura Engine as key tools Inside an Designer and Architects Arsenal. To Design for Humanity with Balanced Solutions and Interconnect with Computer Science Technology.",
+      experience: ["Team member on Pando Populus."],
+    },
     { name: "Priya N", role: "Systems", img: "https://placehold.co/254x240", slug: "priya-n" },
     { name: "John Appleseed", role: "Architecture", img: "https://placehold.co/254x240", slug: "john-appleseed" },
   ];
@@ -2048,7 +2058,7 @@
     ];
 
     const csSlugs = new Set(["omid-ahmadi", "mario-chong-loo", "saron-feyisa", "michael-lee"]);
-    const archSlugs = new Set(["monique-nogueira", "myisha-arellano", "yiceth-cosby", "monica-kaye", "brenda-cardoza"]);
+    const archSlugs = new Set(["monique-nogueira", "myisha-arellano", "yiceth-cosby", "monica-kaye", "brenda-cardoza", "eddie-cortez"]);
     const filteredMembers = members.filter((m) => {
       const slug = String(m?.slug || "");
       if (filterKey === "cs") return csSlugs.has(slug);
