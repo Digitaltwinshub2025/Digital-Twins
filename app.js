@@ -624,6 +624,23 @@
 
   function renderNavbar() {
     if (!navbarEl) return;
+    const route = parseRoute();
+    const activeKey = (() => {
+      if (route.name === "projectDetail") return "projects";
+      if (route.name === "teamMember") return "team";
+      if (route.name === "learning") return "learning";
+      return route.name;
+    })();
+
+    const navLink = (key, href, label) => {
+      const isActive = activeKey === key;
+      const base =
+        "px-4 py-2 rounded-full shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)] transition-colors duration-200";
+      const active = "bg-black text-white";
+      const inactive = "text-black/80 hover:bg-black/5";
+      return `<a href="${href}" class="${base} ${isActive ? active : inactive}" style="font-family:Poppins, ui-sans-serif">${label}</a>`;
+    };
+
     navbarEl.innerHTML = `
       <nav class="w-full bg-white/70 backdrop-blur border-b border-black/5">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
@@ -632,21 +649,11 @@
           </a>
 
           <div class="flex flex-wrap items-center gap-2">
-            <a href="#/" class="px-4 py-2 rounded-full shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)]" style="font-family:Poppins, ui-sans-serif">
-              Home
-            </a>
-            <a href="#/projects" class="px-4 py-2 rounded-full shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)]" style="font-family:Poppins, ui-sans-serif">
-              Projects
-            </a>
-            <a href="#/learning-hub" class="px-4 py-2 rounded-full shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)]" style="font-family:Poppins, ui-sans-serif">
-              Learning Hub
-            </a>
-            <a href="#/team" class="px-4 py-2 rounded-full shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)]" style="font-family:Poppins, ui-sans-serif">
-              Team
-            </a>
-            <a href="#/contact" class="px-4 py-2 rounded-full shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)]" style="font-family:Poppins, ui-sans-serif">
-              Contact
-            </a>
+            ${navLink("home", "#/", "Home")}
+            ${navLink("projects", "#/projects", "Projects")}
+            ${navLink("learning", "#/learning-hub", "Learning Hub")}
+            ${navLink("team", "#/team", "Team")}
+            ${navLink("contact", "#/contact", "Contact")}
           </div>
         </div>
       </nav>
