@@ -777,7 +777,7 @@
         "px-4 py-2 rounded-full shadow-[inset_0_4px_6px_rgba(255,255,255,0.6)] transition-colors duration-200";
       const active = "bg-black text-white";
       const inactive = "text-black/80 hover:bg-black/5";
-      return `<a href="${href}" class="${base} ${isActive ? active : inactive}" style="font-family:Poppins, ui-sans-serif">${label}</a>`;
+      return `<a href="${href}" data-nav-key="${escapeHtml(key)}" class="${base} ${isActive ? active : inactive}" style="font-family:Poppins, ui-sans-serif">${label}</a>`;
     };
 
     navbarEl.innerHTML = `
@@ -797,6 +797,19 @@
         </div>
       </nav>
     `;
+
+    const learningLink = navbarEl.querySelector('a[data-nav-key="learning"]');
+    if (learningLink) {
+      learningLink.addEventListener("click", (e) => {
+        state.learning.currentDetail = null;
+        if (location.hash !== "#/learning-hub") {
+          return;
+        }
+        e.preventDefault();
+        renderLearningHub();
+        renderNavbar();
+      });
+    }
   }
 
   function renderChatAssistant() {
@@ -2343,7 +2356,7 @@
 
     appEl.innerHTML = `
       <div class="min-h-screen bg-neutral-200 transition-all duration-500 ease-out ${mountedClass}">
-        <div class="max-w-7xl mx-auto px-6 py-10">
+        <div class="max-w-7xl mx-auto px-6 py-10 scroll-reveal">
           <div class="flex items-center justify-between gap-4">
             <h1 class="text-black text-3xl sm:text-4xl md:text-6xl" style="font-family:Poppins, ui-sans-serif; font-weight:400">
               Meet Our Team!
@@ -2370,7 +2383,7 @@
             ${sortedMembers
               .map(
                 (m) => `
-              <a href="#/team/${encodeURIComponent(m.slug)}" class="block">
+              <a href="#/team/${encodeURIComponent(m.slug)}" class="block scroll-reveal">
                 <div class="group relative bg-white/5 rounded-3xl backdrop-blur-[1px] overflow-hidden transition-transform transition-shadow duration-300 hover:-translate-y-1 hover:shadow-xl">
                   <img src="${escapeHtml(m.img)}" alt="${escapeHtml(m.name)}"
                     class="w-full h-60 object-cover transform scale-[0.9] transition-transform duration-500 group-hover:scale-[1.15]" style="object-position: ${escapeHtml(m.cardObjectPosition || "50% 20%")};" />
@@ -2395,6 +2408,31 @@
         renderTeamPage();
       });
     });
+
+    const revealTargets = Array.from(appEl.querySelectorAll(".scroll-reveal"));
+    if (state.projectsPage._revealObserver) {
+      try {
+        state.projectsPage._revealObserver.disconnect();
+      } catch (_) {
+        // ignore
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+          } else {
+            entry.target.classList.remove("is-visible");
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+
+    revealTargets.forEach((el) => observer.observe(el));
+    state.projectsPage._revealObserver = observer;
   }
 
   function renderTeamMember(slug) {
@@ -2763,14 +2801,30 @@
         title: p.title,
         category: p.category,
         owner: p.owner,
+        description: p.description || p.goal,
         image: p.image,
         caseStudyUrl: p.caseStudyUrl,
       }));
 
-    const renderProjectCaseStudyCard = (p) => {
+    const renderProjectCaseStudyCard = (p, idx) => {
       const title = escapeHtml(p?.title || "Untitled");
       const meta = [p?.category, p?.owner].filter(Boolean).map((x) => escapeHtml(x)).join(" • ");
-      const img = p && p.image ? String(p.image) : "";
+      const img = p && p.image ? String(p.image).replace(/^\//, "") : "";
+      const reverseClass = Number.isFinite(idx) && idx % 2 === 1 ? "md:flex-row-reverse" : "";
+      const shapeClasses = [
+        "rounded-[2.75rem]",
+        "rounded-tl-[3.25rem] rounded-br-[3.25rem] rounded-tr-2xl rounded-bl-2xl",
+        "rounded-tr-[3.25rem] rounded-bl-[3.25rem] rounded-tl-2xl rounded-br-2xl",
+        "rounded-[1.75rem]",
+      ];
+      const shapeClass = shapeClasses[(Number.isFinite(idx) ? idx : 0) % shapeClasses.length];
+
+      const rawDesc = p && p.description ? String(p.description) : "";
+      const descLine = rawDesc
+        .split(/\r?\n/)
+        .map((s) => s.trim())
+        .filter(Boolean)[0] || "";
+      const shortDesc = descLine.length > 140 ? `${descLine.slice(0, 137)}...` : descLine;
 
       const rawUrl = p && p.caseStudyUrl ? String(p.caseStudyUrl) : "";
       let embedUrl = "";
@@ -2789,42 +2843,35 @@
       }
 
       return `
-        <div class="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow">
-          <div class="relative">
-            <div class="aspect-[16/7] bg-gradient-to-br from-slate-200 via-slate-100 to-white">
-              ${img ? `<img src="${escapeHtml(img)}" alt="${title}" class="w-full h-full object-cover" />` : ""}
-            </div>
-            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
-            <div class="absolute left-5 right-5 bottom-4 flex items-end justify-between gap-4">
-              <div class="min-w-0">
-                <h3 class="text-white text-xl sm:text-2xl font-semibold leading-tight drop-shadow" style="font-family:Poppins, ui-sans-serif, system-ui">
-                  ${title}
-                </h3>
-                ${meta ? `<div class="mt-1 text-xs text-white/85" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">${meta}</div>` : ""}
-              </div>
-              ${rawUrl ? `
-                <a href="${escapeHtml(rawUrl)}" target="_blank" rel="noreferrer"
-                  class="shrink-0 inline-flex items-center justify-center rounded-full bg-white/95 text-black px-4 py-2 text-xs font-semibold hover:bg-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 active:translate-y-0 active:scale-[0.98] outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
-                  style="font-family:Poppins, ui-sans-serif">
-                  Open
-                </a>
-              ` : ""}
-            </div>
-          </div>
-
-          <div class="p-5 sm:p-6 space-y-4">
-            <div class="flex flex-wrap gap-2">
-              ${p?.category ? `<span class="inline-flex items-center rounded-full bg-slate-100 text-slate-700 px-3 py-1 text-[11px] font-medium" style="font-family:Poppins, ui-sans-serif">${escapeHtml(p.category)}</span>` : ""}
-              ${p?.owner ? `<span class="inline-flex items-center rounded-full bg-slate-100 text-slate-700 px-3 py-1 text-[11px] font-medium" style="font-family:Poppins, ui-sans-serif">${escapeHtml(p.owner)}</span>` : ""}
-              <span class="inline-flex items-center rounded-full bg-slate-900 text-white px-3 py-1 text-[11px] font-medium" style="font-family:Poppins, ui-sans-serif">Slides</span>
-            </div>
-
-            ${embedUrl ? `
-              <div>
-                <div class="flex items-center justify-between">
-                  <div class="text-xs font-semibold text-slate-700" style="font-family:Poppins, ui-sans-serif">Preview</div>
+        <div class="max-w-6xl mx-auto rounded-3xl overflow-hidden border border-white/10 bg-white/10 backdrop-blur-md shadow-[0_14px_40px_rgba(0,0,0,0.35)]">
+          <div class="flex flex-col md:flex-row ${reverseClass}">
+            <div class="md:w-1/2">
+              <div class="p-5 sm:p-8">
+                <div class="aspect-[16/10] bg-black/20 overflow-hidden ${shapeClass}">
+                  ${img ? `<img src="${escapeHtml(img)}" alt="${title}" class="w-full h-full object-cover" />` : ""}
                 </div>
-                <div class="mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+              </div>
+            </div>
+
+            <div class="md:w-1/2 flex flex-col justify-center p-5 sm:p-8">
+              <h3 class="text-white/75 text-3xl sm:text-4xl font-semibold leading-tight text-shadow-soft" style="font-family:Poppins, ui-sans-serif, system-ui">
+                ${title}
+              </h3>
+              ${shortDesc ? `<p class="mt-4 text-white/65 text-sm sm:text-base leading-relaxed text-shadow-soft" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">${escapeHtml(shortDesc)}</p>` : ""}
+              ${meta ? `<div class="mt-3 text-white/55 text-sm" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">${meta}</div>` : ""}
+
+              <div class="mt-8 flex items-center gap-3">
+                ${rawUrl ? `
+                  <a href="${escapeHtml(rawUrl)}" target="_blank" rel="noreferrer"
+                    class="inline-flex items-center justify-center rounded-full bg-white/95 text-black px-6 py-3 text-sm font-semibold hover:bg-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/20 active:translate-y-0 active:scale-[0.98] outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                    style="font-family:Poppins, ui-sans-serif">
+                    Open
+                  </a>
+                ` : ""}
+              </div>
+
+              ${embedUrl ? `
+                <div class="mt-8 w-full overflow-hidden rounded-2xl border border-white/10 bg-black/20">
                   <div class="aspect-[16/9]">
                     <iframe
                       title="${title} case study preview"
@@ -2835,12 +2882,8 @@
                     ></iframe>
                   </div>
                 </div>
-              </div>
-            ` : `
-              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
-                Preview unavailable for this case study link.
-              </div>
-            `}
+              ` : ""}
+            </div>
           </div>
         </div>
       `;
@@ -2877,8 +2920,8 @@
               ? `
                 <section class="space-y-4">
                   <h2 class="text-2xl font-semibold text-gray-900" style="font-family:Poppins, ui-sans-serif, system-ui">Project Case Studies</h2>
-                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    ${caseStudyProjects.map(renderProjectCaseStudyCard).join("")}
+                  <div class="space-y-10">
+                    ${caseStudyProjects.map((p, idx) => renderProjectCaseStudyCard(p, idx)).join("")}
                   </div>
                 </section>
               `
@@ -2919,9 +2962,9 @@
                     Learning Hub — your space to explore resources, gain new skills, and grow your knowledge.
                   </p>
                   <div class="mt-10">
-                    <a href="#learning-path" class="inline-flex items-center rounded-full bg-white/10 hover:bg-white/15 border border-white/15 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/30 active:translate-y-0 active:scale-[0.98] outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" style="font-family:Poppins, ui-sans-serif">
+                    <button type="button" data-scroll-to="learning-cards" class="inline-flex items-center rounded-full bg-white/10 hover:bg-white/15 border border-white/15 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/30 active:translate-y-0 active:scale-[0.98] outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0" style="font-family:Poppins, ui-sans-serif">
                       Explore
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -2929,12 +2972,14 @@
           </section>
 
           <div id="learning-path" class="space-y-10 relative p-6">
-            <div class="pointer-events-none absolute inset-x-0 -top-10 bottom-0 -z-10 opacity-50">
-              <div class="h-full w-full bg-gradient-to-br from-sky-200/40 via-emerald-200/40 to-purple-200/40 blur-3xl animate-pulse"></div>
+            <div class="pointer-events-none absolute inset-0 -z-10">
+              <div class="absolute inset-0 bg-center bg-cover" style="background-image:url('./assets/learning-hub-hero.jpg');"></div>
+              <div class="absolute inset-0 bg-black/70"></div>
+              <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/60 to-black/80"></div>
             </div>
 
-            <section class="rounded-3xl border border-black/10 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white overflow-hidden">
-              <div class="p-6 sm:p-8">
+            <section class="text-white scroll-reveal">
+              <div class="px-1 py-2 sm:px-1 sm:py-2">
               <div class="flex items-start justify-between gap-4">
                 <div class="min-w-0">
                   <h2 class="text-xl sm:text-2xl font-semibold" style="font-family:Poppins, ui-sans-serif, system-ui">Learning Path</h2>
@@ -2997,8 +3042,8 @@
             </div>
           </section>
 
-          <section class="space-y-4">
-            <h2 class="text-2xl font-semibold text-gray-900" style="font-family:Poppins, ui-sans-serif, system-ui">Browse Learning Materials</h2>
+          <section id="learning-cards" class="space-y-4 scroll-reveal">
+            <h2 class="text-2xl font-semibold text-white" style="font-family:Poppins, ui-sans-serif, system-ui">Browse Learning Materials</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               ${(() => {
                 const baseOrder = ["caseStudies", "videos", "tutorials", "labs", "templates", "courses"];
@@ -3014,21 +3059,21 @@
                   const progress = Number.isFinite(meta.progress) ? Math.max(0, Math.min(100, meta.progress)) : 0;
                   return `
                     <div data-open-learning="${escapeHtml(key)}"
-                      class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4 relative group cursor-pointer hover:shadow-md transition-shadow">
+                      class="rounded-2xl border border-white/10 bg-white/10 backdrop-blur-md p-6 space-y-4 relative group cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.25)] hover:shadow-[0_14px_40px_rgba(0,0,0,0.35)] transition-shadow">
                       <div>
-                        <h2 class="text-xl font-semibold text-gray-900" style="font-family:Poppins, ui-sans-serif, system-ui">
+                        <h2 class="text-xl font-semibold text-white" style="font-family:Poppins, ui-sans-serif, system-ui">
                           ${escapeHtml(s.title)}
                         </h2>
-                        <p class="mt-2 text-gray-600 text-sm" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+                        <p class="mt-2 text-white/70 text-sm" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
                           ${escapeHtml(s.description)}
                         </p>
                       </div>
 
                       <div class="space-y-3">
-                        <div class="bg-gray-100 h-2 rounded-full overflow-hidden">
+                        <div class="bg-white/10 h-2 rounded-full overflow-hidden">
                           <div class="h-full ${meta.barBg}" style="width:${progress}%;"></div>
                         </div>
-                        <button type="button" data-open-learning-btn="${escapeHtml(key)}" class="w-full rounded-lg border-2 border-black/15 bg-white text-black px-4 py-2 text-sm font-semibold hover:bg-black/5 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10 active:translate-y-0 active:scale-[0.98] outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
+                        <button type="button" data-open-learning-btn="${escapeHtml(key)}" class="w-full rounded-lg border border-white/15 bg-white/10 text-white px-4 py-2 text-sm font-semibold hover:bg-white/15 transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/25 active:translate-y-0 active:scale-[0.98] outline-none focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
                           style="font-family:Poppins, ui-sans-serif">
                           Open
                         </button>
@@ -3043,6 +3088,44 @@
           </div>
         </div>
       `;
+
+    if (!currentDetail) {
+      const revealTargets = Array.from(appEl.querySelectorAll(".scroll-reveal"));
+
+      if (state.learning._revealObserver) {
+        try {
+          state.learning._revealObserver.disconnect();
+        } catch (_) {
+          // ignore
+        }
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+            } else {
+              entry.target.classList.remove("is-visible");
+            }
+          });
+        },
+        { threshold: 0.15 }
+      );
+
+      revealTargets.forEach((el) => observer.observe(el));
+      state.learning._revealObserver = observer;
+
+      appEl.querySelectorAll("[data-scroll-to]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-scroll-to");
+          if (!id) return;
+          const target = document.getElementById(id);
+          if (!target) return;
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+    }
 
     const positionWaveDots = () => {
       const path = appEl.querySelector("#learningWavePath");
