@@ -58,7 +58,7 @@
       role: "Software Engineer",
       img: "Team Members/mario.png",
       slug: "mario-chong-loo",
-      sortOrder: 99,
+      sortOrder: 13,
       education: ["East Los Angeles College", "Cal Poly Pomona"],
       skills: [
         "C++",
