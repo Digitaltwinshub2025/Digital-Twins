@@ -11,7 +11,18 @@
 
   const TEAM_STORAGE_KEY = "dt_team_members";
   const FALLBACK_MEMBERS = [
-    { name: "Meri Sargsian", role: "ShadeLA ProjectHUB", img: "https://placehold.co/254x240", slug: "meri-sargsian" },
+    {
+      name: "Meri Sargsian",
+      role: "Computer Science • Web Development & UX",
+      img: "Team Members/Meri%20Sargsian.png",
+      slug: "meri-sargsian",
+      sortOrder: 0,
+      bio:
+        "Computer Science student at Los Angeles Valley College, planning to transfer to a UC in 2026. Experienced in web development and UX design with skills in React.js, ASP.NET, WordPress, HTML, CSS, and JavaScript. Previously worked as a full-stack developer and web development instructor, and contributed to website design improvements for nonprofit organizations.",
+      skills: ["React.js", "ASP.NET", "WordPress", "HTML", "CSS", "JavaScript", "UX Design"],
+      experience: ["Previously worked as a full-stack developer and web development instructor.", "Contributed to website design improvements for nonprofit organizations.", "Project: Shade LA."],
+      education: ["Los Angeles Valley College — Computer Science"],
+    },
     {
       name: "Omid Ahmadi",
       role: "Software Engineer • Project Lead",
@@ -2355,7 +2366,7 @@
       { key: "arch", label: "Architects" },
     ];
 
-    const csSlugs = new Set(["omid-ahmadi", "mario-chong-loo", "saron-feyisa", "michael-lee", "volodymyr-balan"]);
+    const csSlugs = new Set(["meri-sargsian", "omid-ahmadi", "mario-chong-loo", "saron-feyisa", "michael-lee", "volodymyr-balan"]);
     const archSlugs = new Set(["monique-nogueira", "myisha-arellano", "yiceth-cosby", "monica-kaye", "brenda-cardoza", "eddie-cortez", "eden-olvera"]);
     const filteredMembers = members.filter((m) => {
       const slug = String(m?.slug || "");
