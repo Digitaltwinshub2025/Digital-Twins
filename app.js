@@ -16,7 +16,7 @@
       role: "Computer Science • Web Development & UX",
       img: "Team Members/Meri%20Sargsian.png",
       slug: "meri-sargsian",
-      sortOrder: 0,
+      sortOrder: 14,
       bio:
         "Computer Science student at Los Angeles Valley College, planning to transfer to a UC in 2026. Experienced in web development and UX design with skills in React.js, ASP.NET, WordPress, HTML, CSS, and JavaScript. Previously worked as a full-stack developer and web development instructor, and contributed to website design improvements for nonprofit organizations.",
       skills: ["React.js", "ASP.NET", "WordPress", "HTML", "CSS", "JavaScript", "UX Design"],
@@ -58,7 +58,7 @@
       role: "Software Engineer",
       img: "Team Members/mario.png",
       slug: "mario-chong-loo",
-      sortOrder: 13,
+      sortOrder: 2,
       education: ["East Los Angeles College", "Cal Poly Pomona"],
       skills: [
         "C++",
