@@ -206,7 +206,7 @@
       sortOrder: 7,
       cardObjectPosition: "50% 20%",
       bio:
-        "I am a multidisciplinary designer with training in Mechanical Design and Building Design & Environment. I hold Associate of Science degrees from Pasadena City College and am CSWA-certified in SolidWorks.\n\nExperienced in Rhino, Revit, Twinmotion, and Unreal Engine, I focus on 3D modeling, BIM, and immersive visualization. Through projects and internships—including NASA NCAS and sustainability-focused work—I explore how technology and design can support resilient, environmentally responsible communities in Los Angeles.",
+        "I am a multidisciplinary designer with a background in Mechanical Design and Building Design & Environment, focused on the intersection of technology, infrastructure, and the built environment. My work explores how digital tools, such as 3D modeling, immersive visualization, and digital twins, can help understand, represent, and improve complex urban systems. Through my academic and project work in Los Angeles, I am interested in how design and emerging technologies can support more resilient, sustainable, and community-oriented environments.\n\nExperienced in Rhino, Revit, Twinmotion, and Unreal Engine, I focus on 3D modeling, BIM, and immersive visualization. Through projects and internships—including NASA NCAS and sustainability-focused work—I explore how technology and design can support resilient, environmentally responsible communities in Los Angeles.",
       highlights: [
         "CSWA Certified – SolidWorks",
         "NASA NCAS Program – Hardware Specialist (Lunar Rover Concept)",
