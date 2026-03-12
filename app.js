@@ -3107,7 +3107,24 @@
                                   </div>
                                   <div class="px-5 pb-6">
                                     <div class="aspect-[16/9] w-full overflow-hidden rounded-2xl bg-black">
-                                      <video controls playsinline preload="metadata" class="w-full h-full" src="${vUrl}"></video>
+                                      <video data-learning-video="1" data-learning-video-url="${vUrl}" controls playsinline preload="metadata" class="w-full h-full" src="${vUrl}"></video>
+                                    </div>
+
+                                    <div class="mt-4">
+                                      <div class="h-2 w-full rounded-full bg-black/10 overflow-hidden">
+                                        <div data-learning-video-progress="${vUrl}" class="h-full bg-emerald-600" style="width:0%"></div>
+                                      </div>
+                                      <div class="mt-3 flex items-center justify-between gap-3">
+                                        <div data-learning-video-label="${vUrl}" class="text-xs text-black/60" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">Not started</div>
+                                        <div class="flex items-center gap-2">
+                                          <button type="button" data-learning-video-resume="${vUrl}" class="rounded-full bg-black text-white px-3 py-1.5 text-xs hover:bg-black/90" style="font-family:Poppins, ui-sans-serif">
+                                            Resume
+                                          </button>
+                                          <button type="button" data-learning-video-watched="${vUrl}" class="rounded-full border border-black/20 bg-white/70 px-3 py-1.5 text-xs text-black hover:bg-white" style="font-family:Poppins, ui-sans-serif">
+                                            Mark watched
+                                          </button>
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
@@ -3389,6 +3406,161 @@
         });
       }
     }
+
+    const updateLearningVideoUi = (videoUrl, progress) => {
+      try {
+        const progressEl = appEl.querySelector(`[data-learning-video-progress="${CSS.escape(videoUrl)}"]`);
+        const labelEl = appEl.querySelector(`[data-learning-video-label="${CSS.escape(videoUrl)}"]`);
+        const watchedBtn = appEl.querySelector(`[data-learning-video-watched="${CSS.escape(videoUrl)}"]`);
+
+        const duration = Number(progress?.duration || 0);
+        const currentTime = Number(progress?.currentTime || 0);
+        const watched = !!progress?.watched;
+
+        const pct = duration > 0 ? Math.max(0, Math.min(100, (currentTime / duration) * 100)) : 0;
+        if (progressEl) progressEl.style.width = `${pct}%`;
+
+        if (labelEl) {
+          if (watched) labelEl.textContent = "Watched";
+          else if (currentTime > 0 && duration > 0) labelEl.textContent = `Resume at ${Math.floor(currentTime / 60)}m ${Math.floor(currentTime % 60)}s`;
+          else labelEl.textContent = "Not started";
+        }
+
+        if (watchedBtn) {
+          watchedBtn.textContent = watched ? "Watched" : "Mark watched";
+          watchedBtn.classList.toggle("bg-emerald-600", watched);
+          watchedBtn.classList.toggle("text-white", watched);
+          watchedBtn.classList.toggle("border-emerald-600", watched);
+          watchedBtn.classList.toggle("bg-white/70", !watched);
+          watchedBtn.classList.toggle("text-black", !watched);
+          watchedBtn.classList.toggle("border-black/20", !watched);
+        }
+      } catch (_) {
+        // no-op
+      }
+    };
+
+    const wireLearningVideosProgress = () => {
+      if (!currentDetail || currentDetail.key !== "videos") return;
+
+      const storageKey = "learningHubVideoProgress";
+      let store = {};
+      try {
+        store = JSON.parse(localStorage.getItem(storageKey) || "{}");
+      } catch {
+        store = {};
+      }
+
+      const saveStore = () => {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(store));
+        } catch (_) {
+          // no-op
+        }
+      };
+
+      appEl.querySelectorAll("video[data-learning-video='1']").forEach((videoEl) => {
+        try {
+          const url = String(videoEl.getAttribute("data-learning-video-url") || videoEl.currentSrc || videoEl.src || "");
+          if (!url) return;
+
+          if (!store[url] || typeof store[url] !== "object") store[url] = { currentTime: 0, duration: 0, watched: false };
+
+          const stored = store[url];
+          updateLearningVideoUi(url, stored);
+
+          if (videoEl.dataset.progressWired === "1") return;
+          videoEl.dataset.progressWired = "1";
+
+          videoEl.addEventListener("loadedmetadata", () => {
+            try {
+              const dur = Number(videoEl.duration || 0);
+              if (Number.isFinite(dur) && dur > 0) {
+                store[url].duration = dur;
+                updateLearningVideoUi(url, store[url]);
+                saveStore();
+              }
+
+              const t = Number(store[url].currentTime || 0);
+              if (Number.isFinite(t) && t > 0 && dur > 0) {
+                videoEl.currentTime = Math.max(0, Math.min(dur - 0.25, t));
+              }
+            } catch (_) {
+              // no-op
+            }
+          });
+
+          let lastSavedAt = 0;
+          videoEl.addEventListener("timeupdate", () => {
+            try {
+              const now = Date.now();
+              if (now - lastSavedAt < 1000) return;
+              lastSavedAt = now;
+
+              const dur = Number(videoEl.duration || 0);
+              const t = Number(videoEl.currentTime || 0);
+              if (!Number.isFinite(t) || t < 0) return;
+
+              store[url].currentTime = t;
+              if (Number.isFinite(dur) && dur > 0) store[url].duration = dur;
+
+              if (Number.isFinite(dur) && dur > 0 && t / dur >= 0.98) {
+                store[url].watched = true;
+              }
+
+              updateLearningVideoUi(url, store[url]);
+              saveStore();
+            } catch (_) {
+              // no-op
+            }
+          });
+
+          videoEl.addEventListener("ended", () => {
+            try {
+              store[url].watched = true;
+              updateLearningVideoUi(url, store[url]);
+              saveStore();
+            } catch (_) {
+              // no-op
+            }
+          });
+        } catch (_) {
+          // no-op
+        }
+      });
+
+      appEl.querySelectorAll("[data-learning-video-resume]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const url = String(btn.getAttribute("data-learning-video-resume") || "");
+          if (!url) return;
+          const videoEl = appEl.querySelector(`video[data-learning-video-url="${CSS.escape(url)}"]`);
+          if (!videoEl) return;
+          try {
+            const dur = Number(videoEl.duration || 0);
+            const t = Number(store?.[url]?.currentTime || 0);
+            if (Number.isFinite(dur) && dur > 0 && Number.isFinite(t) && t > 0) {
+              videoEl.currentTime = Math.max(0, Math.min(dur - 0.25, t));
+            }
+            videoEl.play?.();
+          } catch (_) {
+            // no-op
+          }
+        });
+      });
+
+      appEl.querySelectorAll("[data-learning-video-watched]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const url = String(btn.getAttribute("data-learning-video-watched") || "");
+          if (!url) return;
+          if (!store[url] || typeof store[url] !== "object") store[url] = { currentTime: 0, duration: 0, watched: false };
+          store[url].watched = !store[url].watched;
+          updateLearningVideoUi(url, store[url]);
+          saveStore();
+        });
+      });
+    };
+
+    wireLearningVideosProgress();
 
     document.getElementById("learningBackBtn")?.addEventListener("click", () => {
       state.learning.currentDetail = null;
