@@ -2798,6 +2798,10 @@
             '"What is a Digital Twin?" concept video.',
             "Screen-recorded tutorial building a campus energy map.",
             "Walkthrough of a full student project presentation.",
+            {
+              title: "PUHC website walkthrough",
+              url: "./assets/Learning%20Hub/puhc%20website%20walkthrough.mp4",
+            },
           ],
         },
         tutorials: {
@@ -2949,11 +2953,11 @@
             </div>
 
             <div class="md:w-1/2 flex flex-col justify-center p-5 sm:p-8">
-              <h3 class="text-white/70 text-3xl sm:text-4xl font-semibold leading-tight text-shadow-soft" style="font-family:Poppins, ui-sans-serif, system-ui">
+              <h3 class="text-black text-3xl sm:text-4xl font-semibold leading-tight" style="font-family:Poppins, ui-sans-serif, system-ui">
                 ${title}
               </h3>
-              ${shortDesc ? `<p class="mt-4 text-white/60 text-sm sm:text-base leading-relaxed text-shadow-soft" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">${escapeHtml(shortDesc)}</p>` : ""}
-              ${meta ? `<div class="mt-3 text-white/55 text-sm" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">${meta}</div>` : ""}
+              ${shortDesc ? `<p class="mt-4 text-black/80 text-sm sm:text-base leading-relaxed" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">${escapeHtml(shortDesc)}</p>` : ""}
+              ${meta ? `<div class="mt-3 text-black/60 text-sm" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">${meta}</div>` : ""}
 
               <div class="mt-8 flex items-center gap-3">
                 ${rawUrl ? `
@@ -2990,6 +2994,23 @@
       const title = detail?.title || s?.title || "Untitled";
       const description = detail?.description || s?.description || "";
       const items = Array.isArray(detail?.items) ? detail.items : Array.isArray(s?.items) ? s.items : [];
+
+      const renderLearningItem = (it) => {
+        if (!it) return "";
+        if (typeof it === "string") return `<li>${escapeHtml(it)}</li>`;
+        if (typeof it === "object" && it.url && it.title) {
+          const url = String(it.url);
+          const label = String(it.title);
+          return `
+            <li>
+              <a href="${escapeHtml(url)}" target="_blank" rel="noreferrer" class="underline underline-offset-4">
+                ${escapeHtml(label)}
+              </a>
+            </li>
+          `;
+        }
+        return `<li>${escapeHtml(String(it))}</li>`;
+      };
 
       return `
         <div class="space-y-6 relative p-6">
@@ -3029,7 +3050,7 @@
                 <section class="space-y-3">
                   <h2 class="text-2xl font-semibold text-gray-900" style="font-family:Poppins, ui-sans-serif, system-ui">Overview</h2>
                   <ul class="list-disc pl-5 space-y-1 text-sm text-gray-700" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
-                    ${items.map((it) => `<li>${escapeHtml(it)}</li>`).join("")}
+                    ${items.map((it) => renderLearningItem(it)).join("")}
                   </ul>
                 </section>
               `
@@ -3044,7 +3065,7 @@
       : `
         <div class="space-y-10">
           <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen min-h-[100vh] overflow-hidden">
-            <div class="absolute inset-0 bg-center bg-cover" style="background-image:url('./assets/learning-hub-hero.jpg');"></div>
+            <div class="absolute inset-0 bg-center bg-cover" style="background-image:url('./assets/Learning%20Hub/learning-hub-hero.jpg');"></div>
             <div class="absolute inset-0 bg-black/55"></div>
             <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/55 to-black/80"></div>
             <div class="relative h-full flex items-center">
@@ -3068,7 +3089,7 @@
 
           <div id="learning-path" class="space-y-10 relative p-6">
             <div class="pointer-events-none absolute inset-0 -z-10">
-              <div class="absolute inset-0 bg-center bg-cover" style="background-image:url('./assets/learning-hub-hero.jpg');"></div>
+              <div class="absolute inset-0 bg-center bg-cover" style="background-image:url('./assets/Learning%20Hub/learning-hub-hero.jpg');"></div>
               <div class="absolute inset-0 bg-black/70"></div>
               <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/60 to-black/80"></div>
             </div>
