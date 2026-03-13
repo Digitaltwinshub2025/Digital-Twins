@@ -577,6 +577,49 @@
     `;
   }
 
+  function renderDocumentation() {
+    appEl.innerHTML = `
+      <div class="min-h-screen bg-[#DFDFDF]">
+        <div class="max-w-6xl mx-auto px-6 py-12">
+          <h1 class="text-4xl sm:text-5xl font-semibold text-black" style="font-family:Poppins, ui-sans-serif">Documentation</h1>
+          <p class="mt-4 text-black/75 max-w-3xl" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+            Guides, references, and standards for building and contributing to Digital Twins Hub projects.
+          </p>
+
+          <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="rounded-3xl border border-black/10 bg-white/70 p-6 shadow-sm">
+              <div class="text-xl font-semibold text-black" style="font-family:Poppins, ui-sans-serif">Getting Started</div>
+              <div class="mt-2 text-black/70 text-sm" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+                How to navigate the hub, publish a project, and use the Learning Hub resources.
+              </div>
+            </div>
+
+            <div class="rounded-3xl border border-black/10 bg-white/70 p-6 shadow-sm">
+              <div class="text-xl font-semibold text-black" style="font-family:Poppins, ui-sans-serif">Project Standards</div>
+              <div class="mt-2 text-black/70 text-sm" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+                Recommended structure for README files, assets, and demo links.
+              </div>
+            </div>
+
+            <div class="rounded-3xl border border-black/10 bg-white/70 p-6 shadow-sm">
+              <div class="text-xl font-semibold text-black" style="font-family:Poppins, ui-sans-serif">Templates</div>
+              <div class="mt-2 text-black/70 text-sm" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+                Proposal templates, slide decks, and reporting formats.
+              </div>
+            </div>
+
+            <div class="rounded-3xl border border-black/10 bg-white/70 p-6 shadow-sm">
+              <div class="text-xl font-semibold text-black" style="font-family:Poppins, ui-sans-serif">FAQ</div>
+              <div class="mt-2 text-black/70 text-sm" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+                Common questions about collaboration, publishing, and getting access.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   window.__dtVideoFallback = function (videoEl) {
     try {
       if (!videoEl || videoEl.dataset?.fallbackApplied === "1") return;
@@ -693,6 +736,7 @@
     // #/team
     // #/team/:slug
     // #/learning-hub
+    // #/documentation
     // #/contact
     const raw = (location.hash || "#/").replace(/^#/, "");
     const parts = raw.split("/").filter(Boolean);
@@ -705,6 +749,7 @@
     if (base === "team" && !param) return { name: "team" };
     if (base === "team" && param) return { name: "teamMember", slug: param };
     if (base === "learning-hub") return { name: "learning" };
+    if (base === "documentation") return { name: "documentation" };
     if (base === "contact") return { name: "contact" };
     return { name: "home" };
   }
@@ -821,6 +866,7 @@
             ${navLink("home", "#/", "Home")}
             ${navLink("projects", "#/projects", "Projects")}
             ${navLink("learning", "#/learning-hub", "Learning Hub")}
+            ${navLink("documentation", "#/documentation", "Documentation")}
             ${navLink("team", "#/team", "Team")}
             ${navLink("contact", "#/contact", "Contact")}
           </div>
@@ -3689,6 +3735,7 @@
     else if (route.name === "team") renderTeamPage();
     else if (route.name === "teamMember") renderTeamMember(route.slug);
     else if (route.name === "learning") renderLearningHub();
+    else if (route.name === "documentation") renderDocumentation();
     else if (route.name === "contact") renderContact();
     else renderHome();
 
