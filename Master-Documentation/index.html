@@ -998,6 +998,21 @@
     </footer>
   </div>
 
+  <div class="scroll-card is-hidden" id="scrollCard" aria-hidden="true">
+    <div class="sc-shell">
+      <div class="sc-top">
+        <div class="sc-title">
+          <strong>Quick Jump</strong>
+          <span id="scActive">Select a project</span>
+        </div>
+        <button class="sc-toggle" type="button" id="scToggle">Open</button>
+      </div>
+      <div class="sc-panel">
+        <div class="sc-panel-inner" id="scPanel"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal" id="pdfModal" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true" aria-label="PDF Viewer">
       <div class="modal-top">
@@ -1162,6 +1177,78 @@
     if(metaProjectCount){
       metaProjectCount.textContent = String(projectMeta.length).padStart(2, '0');
     }
+
+    const scrollCard = document.getElementById('scrollCard');
+    const scPanel = document.getElementById('scPanel');
+    const scToggle = document.getElementById('scToggle');
+    const scActive = document.getElementById('scActive');
+
+    function scrollCardSetHidden(hidden){
+      if(!scrollCard) return;
+      scrollCard.classList.toggle('is-hidden', Boolean(hidden));
+      scrollCard.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+    }
+
+    function scrollCardSetOpen(open){
+      if(!scrollCard || !scToggle) return;
+      scrollCard.classList.toggle('is-open', Boolean(open));
+      scToggle.textContent = open ? 'Close' : 'Open';
+    }
+
+    function jumpToProject(name){
+      const slug = String(name)
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9\-]/g, '');
+      const target = document.getElementById(`project-${slug}`);
+      if(!target) return;
+
+      if(scActive) scActive.textContent = name;
+      scrollCardSetOpen(false);
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.querySelectorAll('.project').forEach(el => el.classList.toggle('is-active', el === target));
+      target.classList.remove('is-flash');
+      void target.offsetWidth;
+      target.classList.add('is-flash');
+    }
+
+    if(scPanel){
+      scPanel.innerHTML = projectMeta
+        .map((p) => {
+          const safeName = String(p.name || '');
+          const safeLabel = String(p.label || '');
+          return `
+            <div class="sc-item" data-sc-project="${escapeHtml(safeName)}">
+              <div class="sc-item-label">
+                <b>${escapeHtml(safeName)}</b>
+                <i>${escapeHtml(safeLabel)}</i>
+              </div>
+              <button class="sc-jump" type="button" data-sc-jump="${escapeHtml(safeName)}">Jump</button>
+            </div>
+          `;
+        })
+        .join('');
+
+      scPanel.querySelectorAll('[data-sc-jump]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const name = btn.getAttribute('data-sc-jump') || '';
+          if(name) jumpToProject(name);
+        });
+      });
+    }
+
+    if(scToggle){
+      scToggle.addEventListener('click', () => {
+        const open = scrollCard ? scrollCard.classList.contains('is-open') : false;
+        scrollCardSetOpen(!open);
+      });
+    }
+
+    window.addEventListener('scroll', () => {
+      scrollCardSetHidden(window.scrollY < 260);
+    }, { passive: true });
 
     function createAction(label, kind, enabled){
       const a = document.createElement('a');
