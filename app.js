@@ -1008,23 +1008,13 @@
                 <div class="brand-mark"></div>
                 <span>Digital Twins Documentation</span>
               </div>
-              <nav class="nav">
-                <a href="#" class="active" data-doc-nav="home">Home</a>
-                <a href="#" data-doc-nav="projects">Projects</a>
-                <a href="https://digitaltwinshub2025.github.io/Master-Documentation/" target="_blank" rel="noreferrer">Current Site</a>
-              </nav>
             </header>
 
             <section class="hero" id="home">
               <div class="hero-left">
-                <div class="kicker">Trigger-style full screen portfolio</div>
                 <h1>Digital Twin Hub</h1>
-                <p class="hero-copy">
-                  A darker, more cinematic portfolio layout inspired by the Trigger AJAX look: fullscreen composition, strong typography, minimal navigation, immersive project panels, and a sleek editorial presentation for your documentation hub.
-                </p>
                 <div class="hero-actions">
-                  <a class="btn primary" href="#" data-doc-nav="projects">View Projects</a>
-                  <a class="btn secondary" href="https://digitaltwinshub2025.github.io/Master-Documentation/" target="_blank" rel="noreferrer">Open Current Site</a>
+                  <a class="btn primary" href="#projects">View Projects</a>
                 </div>
                 <div class="hero-meta">
                   <div class="meta-card">
@@ -1210,33 +1200,12 @@
             <footer class="footer">
               <div class="footer-inner">
                 <span>Digital Twins Master Documentation</span>
-                <span>Trigger-inspired dark portfolio layout</span>
               </div>
             </footer>
           </div>
         </div>
       </div>
     `;
-
-    const root = appEl.querySelector('.dt-doc');
-    if (!root) return;
-
-    const setActive = (key) => {
-      root.querySelectorAll('.nav a[data-doc-nav]').forEach((a) => {
-        a.classList.toggle('active', a.getAttribute('data-doc-nav') === key);
-      });
-    };
-
-    root.querySelectorAll('[data-doc-nav]').forEach((a) => {
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        const key = a.getAttribute('data-doc-nav');
-        if (!key) return;
-        const target = root.querySelector(`#${key}`);
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        setActive(key);
-      });
-    });
   }
 
   window.__dtVideoFallback = function (videoEl) {
