@@ -2369,6 +2369,109 @@
 
     appEl.innerHTML = `
       <div class="min-h-screen bg-[#DFDFDF] transition-all duration-500 ease-out ${mountedClass}">
+        <style>
+          .dtp-card{
+            position: relative;
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.08);
+            background: rgba(255,255,255,0.72);
+            box-shadow:
+              0 26px 70px rgba(0,0,0,0.12),
+              inset 0 4px 6px rgba(255,255,255,0.7);
+            transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+          }
+
+          .dtp-card:hover{
+            transform: translateY(-6px);
+            border-color: rgba(0,0,0,0.14);
+            box-shadow:
+              0 34px 90px rgba(0,0,0,0.16),
+              inset 0 4px 6px rgba(255,255,255,0.75);
+          }
+
+          .dtp-visual{
+            position: absolute;
+            inset: 0;
+            background:
+              linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.22)),
+              radial-gradient(circle at top right, rgba(255,255,255,0.35), transparent 30%),
+              radial-gradient(circle at 15% 80%, rgba(255,255,255,0.22), transparent 28%),
+              linear-gradient(135deg, rgba(255,255,255,0.55), rgba(0,0,0,0.08) 70%);
+            background-size: auto, auto, auto, cover;
+            background-position: 0 0, 0 0, 0 0, center;
+            background-repeat: no-repeat;
+            filter: saturate(1.02);
+          }
+
+          .dtp-visual::before{
+            content: "";
+            position: absolute;
+            inset: 18px;
+            border: 1px solid rgba(0,0,0,0.10);
+            border-radius: 22px;
+            pointer-events: none;
+          }
+
+          .dtp-content{
+            position: relative;
+            z-index: 1;
+            min-height: 420px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 14px;
+          }
+
+          .dtp-title{
+            font-size: 26px;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            font-weight: 700;
+            color: rgba(0,0,0,0.92);
+          }
+
+          .dtp-meta{
+            font-size: 12px;
+            color: rgba(0,0,0,0.72);
+          }
+
+          .dtp-goal{
+            font-size: 12px;
+            color: rgba(0,0,0,0.78);
+            line-height: 1.6;
+          }
+
+          .dtp-pill{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 11px;
+            letter-spacing: 0.10em;
+            text-transform: uppercase;
+            border: 1px solid rgba(0,0,0,0.10);
+            background: rgba(255,255,255,0.55);
+            color: rgba(0,0,0,0.78);
+            backdrop-filter: blur(8px);
+          }
+
+          .dtp-btn{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            padding: 9px 12px;
+            font-size: 11px;
+            background: rgba(0,0,0,0.86);
+            color: #fff;
+          }
+
+          .dtp-btn:hover{ background: rgba(0,0,0,0.95); }
+        </style>
+
         <div class="max-w-7xl mx-auto px-6 py-10 relative">
           <h1 class="text-black text-4xl sm:text-5xl md:text-7xl"
               style="font-family:Taygiacs, Poppins, ui-sans-serif; font-weight:400; line-height:1">
@@ -2573,47 +2676,34 @@
     const cardTeamPreview = cardTeamNames.slice(0, cardTeamPreviewMax);
     const cardTeamRemaining = Math.max(0, cardTeamNames.length - cardTeamPreview.length);
 
+    const imageUrl = img ? encodeURI(String(img)) : "";
+
     return `
-      <div data-open-preview="${escapeHtml(String(p.id))}"
-        class="group relative rounded-2xl bg-white/60 backdrop-blur-sm overflow-hidden cursor-pointer transition-transform transition-shadow duration-300 hover:-translate-y-1 hover:shadow-xl"
-        style="box-shadow: inset 0 4px 6px rgba(255,255,255,0.6);">
-        <div class="h-44 w-full overflow-hidden bg-white/40 flex items-center justify-center text-black/50">
-          ${
-            img
-              ? `<img src="${escapeHtml(img)}" alt="${escapeHtml(p.title || "project image")}" class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-105" />`
-              : "No image"
-          }
-        </div>
-        <div class="p-5">
-          <div class="flex items-center justify-between gap-2">
-            <div class="text-2xl font-bold text-black" style="font-family: Istok Web, Poppins, ui-sans-serif">
-              ${escapeHtml(p.title || "Untitled")}
+      <div data-open-preview="${escapeHtml(String(p.id))}" class="dtp-card cursor-pointer">
+        <div class="dtp-visual" style="${imageUrl ? `background-image: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.22)), radial-gradient(circle at top right, rgba(255,255,255,0.35), transparent 30%), radial-gradient(circle at 15% 80%, rgba(255,255,255,0.22), transparent 28%), url('${escapeHtml(imageUrl)}');` : ""}"></div>
+        <div class="dtp-content" style="font-family: Istok Web, Poppins, ui-sans-serif">
+          <div class="flex items-end justify-between gap-3">
+            <div class="min-w-0">
+              <div class="dtp-title break-words">${escapeHtml(p.title || "Untitled")}</div>
+              <div class="dtp-meta mt-1">${escapeHtml(p.category || "")}${p.owner ? ` • ${escapeHtml(p.owner)}` : ""}</div>
+              ${
+                cardTeamNames.length
+                  ? `<div class="dtp-meta mt-1">Team: ${escapeHtml(cardTeamPreview.join(", "))}${cardTeamRemaining ? ` +${cardTeamRemaining} more` : ""}</div>`
+                  : ""
+              }
             </div>
+            <div class="dtp-pill">Project</div>
           </div>
-          <div class="mt-1 text-sm text-black" style="font-family: Istok Web, Poppins, ui-sans-serif">
-            ${escapeHtml(p.category || "")}${p.owner ? ` • ${escapeHtml(p.owner)}` : ""}
+
+          ${p.goal ? `<div class="dtp-goal">${escapeHtml(p.goal || "")}</div>` : ""}
+
+          <div class="flex flex-wrap gap-2">
+            ${
+              p.repoUrl
+                ? `<a href="${escapeHtml(p.repoUrl)}" target="_blank" rel="noreferrer" class="dtp-btn" onclick="event.stopPropagation()">Open in Browser</a>`
+                : ""
+            }
           </div>
-          ${
-            cardTeamNames.length
-              ? `<div class="mt-1 text-xs text-black/70" style="font-family: Istok Web, Poppins, ui-sans-serif">
-                  Team: ${escapeHtml(cardTeamPreview.join(", "))}${cardTeamRemaining ? ` +${cardTeamRemaining} more` : ""}
-                </div>`
-              : ""
-          }
-          ${
-            p.repoUrl
-              ? `<div class="mt-2 flex flex-col gap-1 text-xs">
-                  <a href="${escapeHtml(p.repoUrl)}" target="_blank" rel="noreferrer"
-                    class="inline-flex items-center justify-center rounded-full bg-black text-white px-3 py-1 text-[11px] hover:bg-black/90"
-                    onclick="event.stopPropagation()">
-                    Open in Browser
-                  </a>
-                </div>`
-              : ""
-          }
-          <p class="mt-3 text-xs text-black" style="font-family: Istok Web, Poppins, ui-sans-serif">
-            ${escapeHtml(p.goal || "")}
-          </p>
         </div>
       </div>
     `;
