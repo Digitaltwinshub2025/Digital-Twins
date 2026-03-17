@@ -1031,6 +1031,15 @@
 
     const pdfByCard = new WeakMap();
 
+    function escapeHtml(value){
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     const auraPdfByProject = {
       "Altadena": "Altadena Fire Rebuild_ Resilient, Equitable, and Community-Oriented Recovery Plan V100.pdf",
       "Baldwin Hills": "Baldwin Hills 6-Mile Corridor Land Context and Infrastructure Report.pdf",
