@@ -1012,7 +1012,7 @@
 
             <section class="hero" id="home">
               <div class="hero-left">
-                <h1>Digital Twin Hub</h1>
+                <h1>Master Documentation</h1>
                 <div class="hero-actions">
                   <a class="btn primary" href="#projects">View Projects</a>
                 </div>
@@ -1219,6 +1219,21 @@
       "PUHC PUEDE": "./Master-Documentation/assets/ALLYBOOM.png",
       "Reclamation": "./Master-Documentation/assets/ASU RE.png"
     };
+
+    root.querySelectorAll('.showcase-card').forEach((card) => {
+      const name = card.querySelector('strong')?.textContent?.trim() || '';
+      const img = imageByProjectName[name];
+      if (!img) return;
+      const imageUrl = encodeURI(img);
+      card.style.backgroundImage = [
+        'linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.55))',
+        'radial-gradient(circle at top right, rgba(255,255,255,0.10), transparent 26%)',
+        `url("${imageUrl}")`
+      ].join(', ');
+      card.style.backgroundSize = 'auto, auto, cover';
+      card.style.backgroundPosition = '0 0, 0 0, center';
+      card.style.backgroundRepeat = 'no-repeat, no-repeat, no-repeat';
+    });
 
     root.querySelectorAll('.project').forEach((card) => {
       const name = card.querySelector('h3')?.textContent?.trim() || '';
