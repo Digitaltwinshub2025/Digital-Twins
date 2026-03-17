@@ -580,37 +580,663 @@
   function renderDocumentation() {
     const mountedClass = state.projectsPage.mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4";
     appEl.innerHTML = `
-      <div class="min-h-screen transition-all duration-500 ease-out ${mountedClass}" style="background:#111; color:white; font-family:Arial, sans-serif">
+      <div class="min-h-screen transition-all duration-500 ease-out ${mountedClass}">
         <style>
-          .dt-doc-scroll-container{
-            width:100%;
-            overflow:hidden;
-            padding:40px 0;
+          .dt-doc{
+            margin:0;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.05), transparent 20%), #0a0a0d;
+            color: #f5f5f2;
+            font-family: Inter, Arial, Helvetica, sans-serif;
+            overflow-x:hidden;
+            min-height:100vh;
           }
 
-          .dt-doc-scroll-text{
-            font-size:80px;
-            font-weight:700;
-            white-space:nowrap;
-            display:inline-block;
-            animation:dtDocScrollText 18s linear infinite;
+          .dt-doc *{ box-sizing:border-box; }
+          .dt-doc a{ color: inherit; }
+
+          .dt-doc .noise{
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.035;
+            background-image:
+              linear-gradient(rgba(255,255,255,.8) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,.8) 1px, transparent 1px);
+            background-size: 4px 4px, 4px 4px;
+            mix-blend-mode: soft-light;
+            z-index: 0;
           }
 
-          @keyframes dtDocScrollText{
-            0%{ transform:translateX(100%); }
-            100%{ transform:translateX(-100%); }
+          .dt-doc .site{ position: relative; z-index: 1; }
+
+          .dt-doc .topbar{
+            position: fixed;
+            inset: 0 0 auto 0;
+            z-index: 30;
+            padding: 18px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, rgba(10,10,13,0.9), rgba(10,10,13,0.45), transparent);
           }
 
-          @media (max-width: 640px){
-            .dt-doc-scroll-text{ font-size:48px; }
+          .dt-doc .brand{
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            font-size: 11px;
+            color: #d6d6dc;
+          }
+
+          .dt-doc .brand-mark{
+            width: 11px;
+            height: 11px;
+            border-radius: 999px;
+            background: #fff;
+            box-shadow: 0 0 22px rgba(255,255,255,0.4);
+          }
+
+          .dt-doc .nav{ display:flex; gap:20px; align-items:center; }
+
+          .dt-doc .nav a{
+            text-decoration: none;
+            color: #a9a9b3;
+            font-size: 13px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            transition: color .25s ease;
+          }
+
+          .dt-doc .nav a:hover,
+          .dt-doc .nav a.active{ color: #fff; }
+
+          .dt-doc .hero{
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            align-items: stretch;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+          }
+
+          .dt-doc .hero-left,
+          .dt-doc .hero-right{
+            position: relative;
+            min-height: 100vh;
+          }
+
+          .dt-doc .hero-left{
+            padding: 120px 7vw 70px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+          }
+
+          .dt-doc .kicker{
+            color: #a9a9b3;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            font-size: 12px;
+            margin-bottom: 24px;
+          }
+
+          .dt-doc h1{
+            margin: 0;
+            font-size: clamp(3.6rem, 8vw, 8rem);
+            line-height: 0.9;
+            letter-spacing: -0.06em;
+            font-weight: 700;
+            white-space: nowrap;
+            display: inline-block;
+            animation: dtDocScrollTitle 18s linear infinite;
+          }
+
+          @keyframes dtDocScrollTitle{
+            0%{ transform: translateX(100%); }
+            100%{ transform: translateX(-100%); }
+          }
+
+          .dt-doc .hero-copy{
+            max-width: 620px;
+            margin-top: 28px;
+            font-size: 17px;
+            line-height: 1.9;
+            color: #a9a9b3;
+          }
+
+          .dt-doc .hero-actions{
+            margin-top: 38px;
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+          }
+
+          .dt-doc .btn{
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 20px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: transform .22s ease, background .22s ease, border-color .22s ease;
+          }
+
+          .dt-doc .btn.primary{
+            background: #fff;
+            color: #111;
+            border-color: #fff;
+          }
+
+          .dt-doc .btn.secondary{
+            color: #fff;
+            background: transparent;
+          }
+
+          .dt-doc .btn:hover{ transform: translateY(-2px); }
+
+          .dt-doc .hero-meta{
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 54px;
+            max-width: 720px;
+          }
+
+          .dt-doc .meta-card{
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 16px;
+          }
+
+          .dt-doc .meta-card strong{
+            display: block;
+            font-size: 24px;
+            margin-bottom: 6px;
+            font-weight: 600;
+          }
+
+          .dt-doc .meta-card span{
+            color: #a9a9b3;
+            font-size: 13px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+          }
+
+          .dt-doc .hero-right{
+            border-left: 1px solid rgba(255,255,255,0.08);
+            background:
+              linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)),
+              radial-gradient(circle at center, rgba(255,255,255,0.08), transparent 58%);
+            overflow: hidden;
+          }
+
+          .dt-doc .showcase{
+            position: absolute;
+            inset: 90px 40px 40px 40px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 28px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #15151c, #0d0d12 60%);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+          }
+
+          .dt-doc .showcase::before{
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+              linear-gradient(180deg, rgba(255,255,255,0.02), transparent 36%),
+              radial-gradient(circle at 78% 18%, rgba(255,255,255,0.08), transparent 18%),
+              radial-gradient(circle at 18% 74%, rgba(255,255,255,0.05), transparent 24%);
+          }
+
+          .dt-doc .showcase-grid{
+            position: absolute;
+            inset: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1.2fr 0.8fr;
+            gap: 1px;
+            background: rgba(255,255,255,0.08);
+          }
+
+          .dt-doc .showcase-card{
+            position: relative;
+            background: #111117;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            overflow: hidden;
+          }
+
+          .dt-doc .showcase-card::after{
+            content: "";
+            position: absolute;
+            inset: auto -60px -60px auto;
+            width: 180px;
+            height: 180px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            filter: blur(4px);
+          }
+
+          .dt-doc .showcase-card small{
+            position: relative;
+            z-index: 1;
+            color: #bdbdc7;
+            font-size: 11px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+          }
+
+          .dt-doc .showcase-card strong{
+            position: relative;
+            z-index: 1;
+            font-size: 1.25rem;
+            font-weight: 600;
+          }
+
+          .dt-doc .section{ padding: 110px 28px 40px; }
+          .dt-doc .section-inner{ width: min(1400px, 100%); margin: 0 auto; }
+
+          .dt-doc .section-head{
+            display: flex;
+            justify-content: space-between;
+            gap: 28px;
+            align-items: end;
+            margin-bottom: 36px;
+          }
+
+          .dt-doc .section-head h2{
+            margin: 0;
+            font-size: clamp(2rem, 4vw, 4rem);
+            letter-spacing: -0.05em;
+            line-height: 0.95;
+            text-transform: uppercase;
+          }
+
+          .dt-doc .section-head p{
+            margin: 0;
+            max-width: 520px;
+            color: #a9a9b3;
+            line-height: 1.8;
+          }
+
+          .dt-doc .projects{ display:grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+          .dt-doc .project{
+            position: relative;
+            min-height: 420px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 28px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #15151b, #0f1014);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+            transition: transform .28s ease, border-color .28s ease;
+          }
+
+          .dt-doc .project:hover{
+            transform: translateY(-6px);
+            border-color: rgba(255,255,255,0.18);
+          }
+
+          .dt-doc .project-visual{
+            position: absolute;
+            inset: 0;
+            background:
+              linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.48)),
+              radial-gradient(circle at top right, rgba(255,255,255,0.11), transparent 24%),
+              radial-gradient(circle at 15% 80%, rgba(255,255,255,0.07), transparent 22%),
+              linear-gradient(135deg, #1b1c24, #0e0f14 60%);
+          }
+
+          .dt-doc .project-visual::before{
+            content: "";
+            position: absolute;
+            inset: 22px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+          }
+
+          .dt-doc .project-content{
+            position: absolute;
+            inset: 0;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            gap: 18px;
+          }
+
+          .dt-doc .project-top{ display:flex; justify-content: space-between; gap:16px; align-items:end; }
+          .dt-doc .project-label{ font-size: 11px; color: #c7c7cf; text-transform: uppercase; letter-spacing: 0.16em; margin-bottom: 10px; }
+
+          .dt-doc .project h3{
+            margin: 0;
+            font-size: clamp(1.7rem, 3vw, 2.5rem);
+            letter-spacing: -0.04em;
+            line-height: 0.96;
+            text-transform: uppercase;
+          }
+
+          .dt-doc .status{
+            white-space: nowrap;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 999px;
+            padding: 9px 12px;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+          }
+
+          .dt-doc .project p{ margin: 0; max-width: 540px; color: #a9a9b3; line-height: 1.8; }
+          .dt-doc .actions{ display:flex; flex-wrap: wrap; gap: 10px; }
+
+          .dt-doc .action{
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.03);
+            color: #fff;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            transition: background .22s ease, border-color .22s ease;
+          }
+
+          .dt-doc .action:hover{
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.24);
+          }
+
+          .dt-doc .footer{
+            padding: 60px 28px 80px;
+            color: #a9a9b3;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-size: 11px;
+          }
+
+          .dt-doc .footer-inner{
+            width: min(1400px, 100%);
+            margin: 0 auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+          }
+
+          @media (max-width: 1100px) {
+            .dt-doc .hero{ grid-template-columns: 1fr; }
+            .dt-doc .hero-right{ min-height: 58vh; border-left: 0; border-top: 1px solid rgba(255,255,255,0.08); }
+            .dt-doc .projects{ grid-template-columns: 1fr; }
+          }
+
+          @media (max-width: 760px) {
+            .dt-doc .topbar{ padding: 16px 18px; }
+            .dt-doc .nav{ display: none; }
+            .dt-doc .hero-left{ padding: 110px 22px 50px; }
+            .dt-doc .hero-meta{ grid-template-columns: 1fr; }
+            .dt-doc .showcase{ inset: 24px; }
+            .dt-doc .showcase-grid{ grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
+            .dt-doc .section{ padding: 84px 18px 26px; }
+            .dt-doc .section-head{ flex-direction: column; align-items: start; }
+            .dt-doc .project{ min-height: 380px; }
+            .dt-doc .project-content{ padding: 22px; }
+            .dt-doc .footer{ padding: 44px 18px 60px; }
           }
         </style>
 
-        <div class="dt-doc-scroll-container">
-          <div class="dt-doc-scroll-text">DIGITAL TWIN HUB</div>
+        <div class="dt-doc">
+          <div class="noise"></div>
+          <div class="site">
+            <header class="topbar">
+              <div class="brand">
+                <div class="brand-mark"></div>
+                <span>Digital Twins Documentation</span>
+              </div>
+              <nav class="nav">
+                <a href="#" class="active" data-doc-nav="home">Home</a>
+                <a href="#" data-doc-nav="projects">Projects</a>
+                <a href="https://digitaltwinshub2025.github.io/Master-Documentation/" target="_blank" rel="noreferrer">Current Site</a>
+              </nav>
+            </header>
+
+            <section class="hero" id="home">
+              <div class="hero-left">
+                <div class="kicker">Trigger-style full screen portfolio</div>
+                <h1>Digital Twin Hub</h1>
+                <p class="hero-copy">
+                  A darker, more cinematic portfolio layout inspired by the Trigger AJAX look: fullscreen composition, strong typography, minimal navigation, immersive project panels, and a sleek editorial presentation for your documentation hub.
+                </p>
+                <div class="hero-actions">
+                  <a class="btn primary" href="#" data-doc-nav="projects">View Projects</a>
+                  <a class="btn secondary" href="https://digitaltwinshub2025.github.io/Master-Documentation/" target="_blank" rel="noreferrer">Open Current Site</a>
+                </div>
+                <div class="hero-meta">
+                  <div class="meta-card">
+                    <strong>07</strong>
+                    <span>Featured Projects</span>
+                  </div>
+                  <div class="meta-card">
+                    <strong>Maps</strong>
+                    <span>ArcGIS Reports</span>
+                  </div>
+                  <div class="meta-card">
+                    <strong>Media</strong>
+                    <span>PDF / Video / Stream</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hero-right">
+                <div class="showcase">
+                  <div class="showcase-grid">
+                    <div class="showcase-card"><small>Featured</small><strong>ShadeLA</strong></div>
+                    <div class="showcase-card"><small>Research</small><strong>Pando</strong></div>
+                    <div class="showcase-card"><small>Community</small><strong>USGBC</strong></div>
+                    <div class="showcase-card"><small>Landscape</small><strong>Baldwin Hills</strong></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="section" id="projects">
+              <div class="section-inner">
+                <div class="section-head">
+                  <h2>Selected<br>Projects</h2>
+                  <p>
+                    Each card follows the same portfolio language and still supports your practical links for ArcGIS, AURA, Flipthrough, and project videos.
+                  </p>
+                </div>
+
+                <div class="projects">
+                  <article class="project">
+                    <div class="project-visual"></div>
+                    <div class="project-content">
+                      <div class="project-top">
+                        <div>
+                          <div class="project-label">Urban Shade Study</div>
+                          <h3>ShadeLA</h3>
+                        </div>
+                        <div class="status">Active</div>
+                      </div>
+                      <p>Climate, shade, and urban digital twin content presented in a more immersive fullscreen-style portfolio card.</p>
+                      <div class="actions">
+                        <a class="action" href="#">ArcGIS ↗</a>
+                        <a class="action" href="#">AURA PDF ↗</a>
+                        <a class="action" href="#">Flipthrough ↗</a>
+                        <a class="action" href="#">Video ↗</a>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="project">
+                    <div class="project-visual"></div>
+                    <div class="project-content">
+                      <div class="project-top">
+                        <div>
+                          <div class="project-label">Forest / Ecology</div>
+                          <h3>Pando</h3>
+                        </div>
+                        <div class="status">Active</div>
+                      </div>
+                      <p>A portfolio-led project card with bold type, dark surfaces, and clear actions for every documentation asset.</p>
+                      <div class="actions">
+                        <a class="action" href="#">ArcGIS ↗</a>
+                        <a class="action" href="#">AURA PDF ↗</a>
+                        <a class="action" href="#">Flipthrough ↗</a>
+                        <a class="action" href="#">Video ↗</a>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="project">
+                    <div class="project-visual"></div>
+                    <div class="project-content">
+                      <div class="project-top">
+                        <div>
+                          <div class="project-label">Sustainability</div>
+                          <h3>USGBC</h3>
+                        </div>
+                        <div class="status">Ready</div>
+                      </div>
+                      <p>Editorial spacing and darker visual rhythm bring your content closer to the Trigger theme direction.</p>
+                      <div class="actions">
+                        <a class="action" href="#">ArcGIS ↗</a>
+                        <a class="action" href="#">AURA PDF ↗</a>
+                        <a class="action" href="#">Flipthrough ↗</a>
+                        <a class="action" href="#">Video ↗</a>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="project">
+                    <div class="project-visual"></div>
+                    <div class="project-content">
+                      <div class="project-top">
+                        <div>
+                          <div class="project-label">Regional Site</div>
+                          <h3>Baldwin Hills</h3>
+                        </div>
+                        <div class="status">Ready</div>
+                      </div>
+                      <p>Dark gradients, cinematic overlays, and streamlined navigation help the site feel more premium and portfolio-driven.</p>
+                      <div class="actions">
+                        <a class="action" href="#">ArcGIS ↗</a>
+                        <a class="action" href="#">AURA PDF ↗</a>
+                        <a class="action" href="#">Flipthrough ↗</a>
+                        <a class="action" href="#">Video ↗</a>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="project">
+                    <div class="project-visual"></div>
+                    <div class="project-content">
+                      <div class="project-top">
+                        <div>
+                          <div class="project-label">Field Study</div>
+                          <h3>Altadena</h3>
+                        </div>
+                        <div class="status">Draft</div>
+                      </div>
+                      <p>A strong template for adding richer project details later without changing the overall design system.</p>
+                      <div class="actions">
+                        <a class="action" href="#">ArcGIS ↗</a>
+                        <a class="action" href="#">AURA PDF ↗</a>
+                        <a class="action" href="#">Flipthrough ↗</a>
+                        <a class="action" href="#">Video ↗</a>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="project">
+                    <div class="project-visual"></div>
+                    <div class="project-content">
+                      <div class="project-top">
+                        <div>
+                          <div class="project-label">Community Project</div>
+                          <h3>PUHC PUEDE</h3>
+                        </div>
+                        <div class="status">Draft</div>
+                      </div>
+                      <p>The structure stays easy to edit while the design moves much closer to the fullscreen Trigger aesthetic.</p>
+                      <div class="actions">
+                        <a class="action" href="#">ArcGIS ↗</a>
+                        <a class="action" href="#">AURA PDF ↗</a>
+                        <a class="action" href="#">Flipthrough ↗</a>
+                        <a class="action" href="#">Video ↗</a>
+                      </div>
+                    </div>
+                  </article>
+
+                  <article class="project">
+                    <div class="project-visual"></div>
+                    <div class="project-content">
+                      <div class="project-top">
+                        <div>
+                          <div class="project-label">Water / Land</div>
+                          <h3>Reclamation</h3>
+                        </div>
+                        <div class="status">Draft</div>
+                      </div>
+                      <p>Use this section for more technical documentation while preserving the premium visual presentation.</p>
+                      <div class="actions">
+                        <a class="action" href="#">ArcGIS ↗</a>
+                        <a class="action" href="#">AURA PDF ↗</a>
+                        <a class="action" href="#">Flipthrough ↗</a>
+                        <a class="action" href="#">Video ↗</a>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </div>
+            </section>
+
+            <footer class="footer">
+              <div class="footer-inner">
+                <span>Digital Twins Master Documentation</span>
+                <span>Trigger-inspired dark portfolio layout</span>
+              </div>
+            </footer>
+          </div>
         </div>
       </div>
     `;
+
+    const root = appEl.querySelector('.dt-doc');
+    if (!root) return;
+
+    const setActive = (key) => {
+      root.querySelectorAll('.nav a[data-doc-nav]').forEach((a) => {
+        a.classList.toggle('active', a.getAttribute('data-doc-nav') === key);
+      });
+    };
+
+    root.querySelectorAll('[data-doc-nav]').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const key = a.getAttribute('data-doc-nav');
+        if (!key) return;
+        const target = root.querySelector(`#${key}`);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setActive(key);
+      });
+    });
   }
 
   window.__dtVideoFallback = function (videoEl) {
