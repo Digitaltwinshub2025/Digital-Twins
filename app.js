@@ -579,59 +579,11 @@
 
   function renderDocumentation() {
     const mountedClass = state.projectsPage.mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4";
-    const docSrc = "./Master-Documentation/index.html";
     appEl.innerHTML = `
       <div class="min-h-screen bg-[#DFDFDF] transition-all duration-500 ease-out ${mountedClass}">
-        <div class="max-w-7xl mx-auto px-6 py-4 relative">
-          <div class="rounded-3xl overflow-hidden border border-black/10 shadow-lg bg-white">
-            <iframe
-              id="documentationFrame"
-              title="Documentation"
-              src="${escapeHtml(docSrc)}"
-              class="w-full"
-              scrolling="no"
-              style="height: 1200px; border:0; overflow:hidden"
-              loading="eager"
-            ></iframe>
-          </div>
-        </div>
+        <div class="max-w-7xl mx-auto px-6 py-4 relative"></div>
       </div>
     `;
-
-    const iframe = appEl.querySelector('#documentationFrame');
-    if (!iframe) return;
-
-    const setHeight = () => {
-      try {
-        const doc = iframe.contentDocument;
-        if (!doc) return;
-        const h = Math.max(
-          doc.body ? doc.body.scrollHeight : 0,
-          doc.documentElement ? doc.documentElement.scrollHeight : 0
-        );
-        if (h && Number.isFinite(h)) iframe.style.height = `${h}px`;
-      } catch (_) {
-        // no-op
-      }
-    };
-
-    iframe.addEventListener('load', () => {
-      setHeight();
-      try {
-        const doc = iframe.contentDocument;
-        if (!doc || !doc.body) return;
-
-        const obs = new MutationObserver(() => setHeight());
-        obs.observe(doc.body, { childList: true, subtree: true, attributes: true, characterData: true });
-
-        const onResize = () => setHeight();
-        window.addEventListener('resize', onResize);
-
-        iframe.dataset._dtDocResizeBound = '1';
-      } catch (_) {
-        // no-op
-      }
-    }, { once: true });
   }
 
   window.__dtVideoFallback = function (videoEl) {
