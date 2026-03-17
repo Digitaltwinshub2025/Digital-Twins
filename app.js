@@ -598,16 +598,53 @@
 
           <div class="mt-8 rounded-3xl overflow-hidden border border-black/10 shadow-lg bg-white">
             <iframe
+              id="documentationFrame"
               title="Documentation"
               src="${escapeHtml(docSrc)}"
               class="w-full"
-              style="height: calc(100vh - 240px); border:0"
+              scrolling="no"
+              style="height: 1200px; border:0; overflow:hidden"
               loading="eager"
             ></iframe>
           </div>
         </div>
       </div>
     `;
+
+    const iframe = appEl.querySelector('#documentationFrame');
+    if (!iframe) return;
+
+    const setHeight = () => {
+      try {
+        const doc = iframe.contentDocument;
+        if (!doc) return;
+        const h = Math.max(
+          doc.body ? doc.body.scrollHeight : 0,
+          doc.documentElement ? doc.documentElement.scrollHeight : 0
+        );
+        if (h && Number.isFinite(h)) iframe.style.height = `${h}px`;
+      } catch (_) {
+        // no-op
+      }
+    };
+
+    iframe.addEventListener('load', () => {
+      setHeight();
+      try {
+        const doc = iframe.contentDocument;
+        if (!doc || !doc.body) return;
+
+        const obs = new MutationObserver(() => setHeight());
+        obs.observe(doc.body, { childList: true, subtree: true, attributes: true, characterData: true });
+
+        const onResize = () => setHeight();
+        window.addEventListener('resize', onResize);
+
+        iframe.dataset._dtDocResizeBound = '1';
+      } catch (_) {
+        // no-op
+      }
+    }, { once: true });
   }
 
   window.__dtVideoFallback = function (videoEl) {
