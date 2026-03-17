@@ -582,21 +582,8 @@
     const docSrc = "./Master-Documentation/index.html";
     appEl.innerHTML = `
       <div class="min-h-screen bg-[#DFDFDF] transition-all duration-500 ease-out ${mountedClass}">
-        <div class="max-w-7xl mx-auto px-6 py-10 relative">
-          <div class="flex items-end justify-between gap-6">
-            <h1 class="text-black text-4xl sm:text-5xl md:text-7xl"
-              style="font-family:Taygiacs, Poppins, ui-sans-serif; font-weight:400; line-height:1">
-              Documentation
-            </h1>
-
-            <a href="${escapeHtml(docSrc)}" target="_blank" rel="noreferrer"
-              class="px-4 py-2 rounded-full bg-black text-white hover:bg-black/90 shadow-[inset_0_4px_6px_rgba(255,255,255,0.25)]"
-              style="font-family:Poppins, ui-sans-serif">
-              Open Full Page
-            </a>
-          </div>
-
-          <div class="mt-8 rounded-3xl overflow-hidden border border-black/10 shadow-lg bg-white">
+        <div class="max-w-7xl mx-auto px-6 py-4 relative">
+          <div class="rounded-3xl overflow-hidden border border-black/10 shadow-lg bg-white">
             <iframe
               id="documentationFrame"
               title="Documentation"
