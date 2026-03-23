@@ -2624,6 +2624,16 @@
       </div>
     `;
 
+    if (previewing) {
+      if (state.projectsPage._prevBodyOverflow == null) state.projectsPage._prevBodyOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+    } else {
+      if (state.projectsPage._prevBodyOverflow != null) {
+        document.body.style.overflow = state.projectsPage._prevBodyOverflow;
+        state.projectsPage._prevBodyOverflow = null;
+      }
+    }
+
     // Wire search input
     const search = document.getElementById("projectsSearch");
     search?.addEventListener("input", (e) => {
@@ -2728,7 +2738,7 @@
     return `
       <div class="fixed inset-0 z-50">
         <div id="previewScroll"
-          class="relative w-screen h-screen max-w-none max-h-none bg-white overflow-y-auto flex flex-col transform transition-transform duration-300 ease-out scale-100">
+          class="fixed inset-0 w-screen h-screen max-w-none max-h-none bg-white overflow-y-auto flex flex-col transform transition-transform duration-300 ease-out scale-100 [overscroll-behavior:contain]">
 
           <div class="bg-white/95 backdrop-blur border-b border-black/10">
             ${img ? `<div class="h-36 sm:h-44 lg:h-48 w-full overflow-hidden bg-black/5"><img src="${escapeHtml(img)}" class="w-full h-full object-cover" /></div>` : ""}
