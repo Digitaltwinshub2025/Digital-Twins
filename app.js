@@ -2445,16 +2445,34 @@
             bottom: 18px;
             z-index: 2;
             max-width: calc(100% - 140px);
-            max-height: 64px;
+            max-height: 72px;
             overflow: auto;
-            padding: 8px 10px;
+            padding: 6px 6px;
             border-radius: 14px;
             border: 1px solid rgba(0,0,0,0.10);
             background: rgba(255,255,255,0.65);
-            color: rgba(0,0,0,0.78);
             backdrop-filter: blur(8px);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+          }
+
+          .dtp-teamchip{
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(0,0,0,0.10);
+            background: rgba(255,255,255,0.72);
+            color: rgba(0,0,0,0.78);
             font-size: 11px;
-            line-height: 1.25;
+            line-height: 1.1;
+            max-width: 180px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
 
           .dtp-card:hover{
@@ -2763,7 +2781,12 @@
       return deduped;
     })();
 
-    const cardTeamLine = cardTeamNames.length ? cardTeamNames.join(", ") : "";
+    const cardTeamPreviewMax = 4;
+    const cardTeamPreview = cardTeamNames.slice(0, cardTeamPreviewMax);
+    const cardTeamRemaining = Math.max(0, cardTeamNames.length - cardTeamPreview.length);
+    const cardTeamChips = cardTeamPreview
+      .map((n) => `<span class="dtp-teamchip">${escapeHtml(n)}</span>`)
+      .join("");
 
     const imageUrl = img ? encodeURI(String(img)) : "";
 
@@ -2774,7 +2797,11 @@
           <div class="dtp-visual" style="${imageUrl ? `background-image: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.22)), radial-gradient(circle at top right, rgba(255,255,255,0.35), transparent 30%), radial-gradient(circle at 15% 80%, rgba(255,255,255,0.22), transparent 28%), url('${escapeHtml(imageUrl)}');` : ""}"></div>
           <div class="dtp-content" style="font-family: Istok Web, Poppins, ui-sans-serif">
             <div class="dtp-pill">Projects Detalis</div>
-            ${cardTeamLine ? `<div class="dtp-teamlist">${escapeHtml(cardTeamLine)}</div>` : ""}
+            ${
+              cardTeamNames.length
+                ? `<div class="dtp-teamlist">${cardTeamChips}${cardTeamRemaining ? `<span class=\"dtp-teamchip\">+${cardTeamRemaining}</span>` : ""}</div>`
+                : ""
+            }
 
             <div class="flex flex-wrap gap-2">
               ${
