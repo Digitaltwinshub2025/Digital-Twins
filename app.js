@@ -2654,11 +2654,22 @@
 
     // If modal is open, ensure the user lands at the top of the content
     if (previewing) {
-      requestAnimationFrame(() => {
+      const scrollPreviewToTop = () => {
         const scroller = document.getElementById("previewScroll");
-        scroller?.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        if (scroller) {
+          scroller.scrollTop = 0;
+          scroller.scrollLeft = 0;
+          scroller.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        }
         const title = document.getElementById("previewTitle");
         title?.focus?.({ preventScroll: true });
+      };
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          scrollPreviewToTop();
+          setTimeout(scrollPreviewToTop, 0);
+        });
       });
     }
 
