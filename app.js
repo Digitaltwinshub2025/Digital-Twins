@@ -2480,9 +2480,9 @@
             align-items: center;
             justify-content: center;
             border-radius: 999px;
-            padding: 8px 12px;
-            font-size: 11px;
-            letter-spacing: 0.10em;
+            padding: clamp(6px, 0.65vw, 8px) clamp(10px, 0.95vw, 12px);
+            font-size: clamp(10px, 0.85vw, 12px);
+            letter-spacing: 0.08em;
             text-transform: uppercase;
             border: 1px solid rgba(0,0,0,0.10);
             background: rgba(255,255,255,0.55);
