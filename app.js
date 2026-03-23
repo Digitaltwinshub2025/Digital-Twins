@@ -2724,7 +2724,7 @@
                   : ""
               }
             </div>
-            <div class="dtp-pill">Project</div>
+            <div class="dtp-pill">Projects Detalis</div>
           </div>
 
           ${p.goal ? `<div class="dtp-goal">${escapeHtml(p.goal || "")}</div>` : ""}
