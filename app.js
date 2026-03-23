@@ -2430,7 +2430,7 @@
               radial-gradient(circle at top right, rgba(255,255,255,0.35), transparent 30%),
               radial-gradient(circle at 15% 80%, rgba(255,255,255,0.22), transparent 28%),
               linear-gradient(135deg, rgba(255,255,255,0.55), rgba(0,0,0,0.08) 70%);
-            background-size: auto, auto, auto, 92%;
+            background-size: auto, auto, auto, cover;
             background-position: 0 0, 0 0, 0 0, center;
             background-repeat: no-repeat;
             filter: saturate(1.02);
