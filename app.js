@@ -2450,23 +2450,11 @@
             z-index: 1;
             min-height: 420px;
             padding: 22px;
+            padding-bottom: 56px;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
             gap: 14px;
-          }
-
-          .dtp-headbox{
-            width: 100%;
-            max-width: 520px;
-            margin: 0 auto;
-            text-align: center;
-            border-radius: 18px;
-            padding: 12px 14px;
-            border: 1px solid rgba(0,0,0,0.10);
-            background: rgba(255,255,255,0.70);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.10);
           }
 
           .dtp-title{
@@ -2493,7 +2481,7 @@
             align-items: center;
             justify-content: center;
             position: absolute;
-            top: 18px;
+            bottom: 18px;
             right: 18px;
             border-radius: 999px;
             padding: clamp(4px, 0.45vw, 6px) clamp(8px, 0.75vw, 10px);
@@ -2732,16 +2720,14 @@
         <div class="dtp-content" style="font-family: Istok Web, Poppins, ui-sans-serif">
           <div class="dtp-pill">Projects Detalis</div>
 
-          <div class="dtp-headbox">
-            <div class="min-w-0">
-              <div class="dtp-title break-words">${escapeHtml(p.title || "Untitled")}</div>
-              <div class="dtp-meta mt-1">${escapeHtml(p.category || "")}${p.owner ? ` • ${escapeHtml(p.owner)}` : ""}</div>
-              ${
-                cardTeamNames.length
-                  ? `<div class="dtp-meta mt-1">Team: ${escapeHtml(cardTeamPreview.join(", "))}${cardTeamRemaining ? ` +${cardTeamRemaining} more` : ""}</div>`
-                  : ""
-              }
-            </div>
+          <div class="min-w-0 text-center">
+            <div class="dtp-title break-words">${escapeHtml(p.title || "Untitled")}</div>
+            <div class="dtp-meta mt-1">${escapeHtml(p.category || "")}${p.owner ? ` • ${escapeHtml(p.owner)}` : ""}</div>
+            ${
+              cardTeamNames.length
+                ? `<div class="dtp-meta mt-1">Team: ${escapeHtml(cardTeamPreview.join(", "))}${cardTeamRemaining ? ` +${cardTeamRemaining} more` : ""}</div>`
+                : ""
+            }
           </div>
 
           ${p.goal ? `<div class="dtp-goal">${escapeHtml(p.goal || "")}</div>` : ""}
