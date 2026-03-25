@@ -4071,11 +4071,14 @@
     appEl.innerHTML = currentDetail
       ? renderLearningDetailPage(currentDetail)
       : `
-        <div class="space-y-10">
-          <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen min-h-[100vh] overflow-hidden">
+        <div class="space-y-10 relative">
+          <div class="pointer-events-none fixed inset-0 -z-10">
             <div class="absolute inset-0 bg-center bg-cover" style="background-image:url('./assets/Learning%20Hub/learning-hub-hero.jpg');"></div>
             <div class="absolute inset-0 bg-black/55"></div>
             <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/55 to-black/80"></div>
+          </div>
+
+          <section class="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen min-h-[100vh] overflow-hidden">
             <div class="relative h-full flex items-center">
               <div class="max-w-7xl mx-auto w-full px-6 py-20">
                 <div class="max-w-3xl">
@@ -4096,12 +4099,6 @@
           </section>
 
           <div id="learning-path" class="space-y-6 relative p-4 sm:p-6">
-            <div class="pointer-events-none absolute inset-0 -z-10">
-              <div class="absolute inset-0 bg-center bg-cover" style="background-image:url('./assets/Learning%20Hub/learning-hub-hero.jpg');"></div>
-              <div class="absolute inset-0 bg-black/50"></div>
-              <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-black/70"></div>
-            </div>
-
             <section class="text-white scroll-reveal">
               <div class="px-1 py-2 sm:px-1 sm:py-2">
               <div class="flex items-start justify-between gap-4">
