@@ -4095,11 +4095,11 @@
             </div>
           </section>
 
-          <div id="learning-path" class="space-y-10 relative p-6">
+          <div id="learning-path" class="space-y-6 relative p-4 sm:p-6">
             <div class="pointer-events-none absolute inset-0 -z-10">
               <div class="absolute inset-0 bg-center bg-cover" style="background-image:url('./assets/Learning%20Hub/learning-hub-hero.jpg');"></div>
-              <div class="absolute inset-0 bg-black/70"></div>
-              <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/60 to-black/80"></div>
+              <div class="absolute inset-0 bg-black/50"></div>
+              <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-black/70"></div>
             </div>
 
             <section class="text-white scroll-reveal">
@@ -4114,7 +4114,7 @@
               </div>
 
               <div class="mt-6">
-                <div class="relative h-[160px]">
+                <div class="relative h-[120px] sm:h-[140px]">
                     <svg class="absolute inset-0 w-full h-full" viewBox="0 0 900 140" preserveAspectRatio="none" aria-hidden="true">
                       <defs>
                         <linearGradient id="learningWave" x1="0" y1="0" x2="1" y2="0">
