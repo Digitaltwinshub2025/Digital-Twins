@@ -4090,7 +4090,7 @@
                       Explore
                     </button>
                   </div>
-                  <p id="learningHeroSentence" class="mt-6 text-white/90 text-lg sm:text-xl md:text-2xl leading-relaxed origin-left" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; transform: scale(1); will-change: transform; transition: transform 120ms linear;">
+                  <p id="learningHeroSentence" class="mt-10 max-w-3xl text-white/90 text-lg sm:text-xl md:text-2xl leading-relaxed text-center mx-auto origin-center" style="font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; transform: scale(1); will-change: transform; transition: transform 120ms linear;">
                     Learning Hub — your space to explore resources, gain new skills, and grow your knowledge.
                   </p>
                 </div>
