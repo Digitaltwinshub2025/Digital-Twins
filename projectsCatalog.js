@@ -151,8 +151,8 @@ window.PROJECTS_CATALOG = [
     repoUrl: 'https://digitaltwinshub.github.io/Baldwin/',
     demoUrl: 'https://digitaltwinshub.github.io/Baldwin/',
     caseStudyUrl: 'https://docs.google.com/presentation/d/1z8uyGmwZGCtqGBg7ekWhlDwHqartNv4AzphWol4LibY/edit',
-    videoUrl: 'https://drive.google.com/file/d/1Mtr_PEtuTASlkRgcPuQJc0BHIPHrg0j4/view?usp=sharing',
-    videoEmbedUrl: 'https://drive.google.com/file/d/1Mtr_PEtuTASlkRgcPuQJc0BHIPHrg0j4/preview',
+    videoUrl: 'https://youtu.be/BkhvcYlJ5rk?si=0mAdX_oJSg0sXIVE',
+    videoEmbedUrl: 'https://www.youtube.com/embed/BkhvcYlJ5rk',
     description:
       'The Baldwin Hills 6-Mile Corridor Initiative is a digital twin project focused on modeling and visualizing the Baldwin Hills 6-Mile Corridor — a significant urban and environmental area in Los Angeles County. The initiative creates a spatially informed digital representation that supports planning, analysis, and community engagement by integrating environmental, social, and built-environment characteristics of the corridor.\n\nDigital twin technology enables a dynamic digital representation of real-world systems that can simulate conditions, analyze performance, and support data-driven decision-making using real datasets, analytical models, and interactive visualization tools.',
     goal:
