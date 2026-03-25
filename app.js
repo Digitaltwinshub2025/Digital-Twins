@@ -1275,6 +1275,28 @@
       videoLink.setAttribute('target', '_blank');
       videoLink.setAttribute('rel', 'noreferrer');
     });
+
+    const auraPdfByProjectName = {
+      "ShadeLA": "./Master-Documentation/Shade LA_ Transforming Urban Heat Islands in South Los Angeles Census Tracts 5351.01, 2430, 2382, and 2240.10 through Equitable Shade Structures and Regenerative Design.pdf",
+      "Baldwin Hills": "./Master-Documentation/Baldwin Hills 6-Mile Corridor Land Context and Infrastructure Report.pdf",
+      "Reclamation": "./Master-Documentation/Reclamation Site 2_ Holistic Ecosystem Restoration for Climate-Resilient Urban Equity in Census Tract 6017.pdf",
+      "Pando": "./Master-Documentation/Pando Populus_ Comprehensive Environmental and Social Resilience Assessment for Census Tract 1397.02 Images.pdf",
+      "Altadena": "./Master-Documentation/Altadena Fire Rebuild_ Resilient, Equitable, and Community-Oriented Recovery Plan V100.pdf",
+      "PUHC PUEDE": "./Master-Documentation/PUHC PUEDE Alleys_ Architecture and Urban Design for Environmental Justice, Climate Resilience, and Community Health in South Los Angeles Census Tracts 2098.10 and 2095.20.pdf",
+    };
+
+    root.querySelectorAll('.project').forEach((card) => {
+      const name = card.querySelector('h3')?.textContent?.trim() || '';
+      const pdfPath = auraPdfByProjectName[name];
+      if (!pdfPath) return;
+
+      const auraLink = Array.from(card.querySelectorAll('.actions a.action')).find((a) => (a.textContent || "").toLowerCase().includes('aura'));
+      if (!auraLink) return;
+
+      auraLink.setAttribute('href', encodeURI(pdfPath));
+      auraLink.setAttribute('target', '_blank');
+      auraLink.setAttribute('rel', 'noreferrer');
+    });
   }
 
   window.__dtVideoFallback = function (videoEl) {
