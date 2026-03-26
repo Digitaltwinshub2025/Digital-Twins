@@ -1218,6 +1218,18 @@
       }
     });
 
+    // Force-restart the marquee animation on each navigation (some browsers may keep it paused/stale)
+    try {
+      const titleEl = root.querySelector("h1");
+      if (titleEl) {
+        titleEl.style.animation = "none";
+        void titleEl.offsetHeight;
+        titleEl.style.animation = "";
+      }
+    } catch (_) {
+      // no-op
+    }
+
     const imageByProjectName = {
       "ShadeLA": "./Master-Documentation/assets/ShadeLAA.png",
       "Pando": "./Master-Documentation/assets/Pandoo.png",
@@ -3804,6 +3816,12 @@
     const currentDetail = state.learning.currentDetail;
     const projects = Array.isArray(state.projects) ? state.projects : [];
 
+    // Clean up any previous hero scroll handler (important when navigating between routes or detail views)
+    if (state.learning._heroScrollHandler) {
+      window.removeEventListener("scroll", state.learning._heroScrollHandler);
+      state.learning._heroScrollHandler = null;
+    }
+
     const learningCardMeta = {
       courses: { icon: "🐍", iconBg: "bg-blue-100 text-blue-700", barBg: "bg-blue-500", progress: 45 },
       videos: { icon: "🎥", iconBg: "bg-emerald-100 text-emerald-700", barBg: "bg-emerald-500", progress: 60 },
@@ -4247,12 +4265,7 @@
         });
       });
 
-      // Scroll-driven hero sentence scale
-      if (state.learning._heroScrollHandler) {
-        window.removeEventListener("scroll", state.learning._heroScrollHandler);
-        state.learning._heroScrollHandler = null;
-      }
-
+      // Scroll-driven hero sentence scale (re-initialized on each visit)
       const sentenceEl = document.getElementById("learningHeroSentence");
       if (sentenceEl) {
         let rafId = 0;
