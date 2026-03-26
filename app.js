@@ -1218,12 +1218,12 @@
       }
 
       // Force-restart the marquee animation on each navigation.
-      // Cloning the node is more reliable than toggling style.animation across browsers.
       try {
         const titleEl = root.querySelector("h1");
-        if (titleEl && titleEl.parentNode) {
-          const clone = titleEl.cloneNode(true);
-          titleEl.parentNode.replaceChild(clone, titleEl);
+        if (titleEl) {
+          titleEl.style.animation = "none";
+          void titleEl.offsetWidth;
+          titleEl.style.animation = "dtDocScrollTitle 18s linear infinite";
         }
       } catch (_) {
         // no-op
@@ -4278,14 +4278,9 @@
 
         const update = () => {
           rafId = 0;
-          const rect = sentenceEl.getBoundingClientRect();
           const viewportH = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1);
-
-          // Progress increases as the user scrolls down; anchored to sentence position.
-          const start = viewportH * 0.75;
-          const end = viewportH * 0.15;
-          const t = (start - rect.top) / Math.max(1, start - end);
-          const progress = Math.max(0, Math.min(1, t));
+          const y = Math.max(0, window.scrollY || window.pageYOffset || 0);
+          const progress = Math.max(0, Math.min(1, y / (viewportH * 1.1)));
           const scale = 1 + progress * 0.65;
           sentenceEl.style.transform = `scale(${scale.toFixed(3)})`;
         };
