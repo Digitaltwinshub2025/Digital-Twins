@@ -3837,6 +3837,15 @@
       state.learning._heroScrollTarget = null;
     }
 
+    if (state.learning._heroScrollLoopCancel) {
+      try {
+        state.learning._heroScrollLoopCancel();
+      } catch (_) {
+        // no-op
+      }
+      state.learning._heroScrollLoopCancel = null;
+    }
+
     const learningCardMeta = {
       courses: { icon: "🐍", iconBg: "bg-blue-100 text-blue-700", barBg: "bg-blue-500", progress: 45 },
       videos: { icon: "🎥", iconBg: "bg-emerald-100 text-emerald-700", barBg: "bg-emerald-500", progress: 60 },
@@ -4306,17 +4315,50 @@
 
         const scrollTarget = getScrollTarget();
 
+        const readScrollY = () => {
+          try {
+            const winY = Math.max(0, window.scrollY || window.pageYOffset || 0);
+            if (winY) return winY;
+          } catch (_) {
+            // no-op
+          }
+
+          try {
+            const se = document.scrollingElement;
+            const seY = se ? Math.max(0, se.scrollTop || 0) : 0;
+            if (seY) return seY;
+          } catch (_) {
+            // no-op
+          }
+
+          try {
+            const mainEl = document.querySelector("main");
+            const mainY = mainEl ? Math.max(0, mainEl.scrollTop || 0) : 0;
+            if (mainY) return mainY;
+          } catch (_) {
+            // no-op
+          }
+
+          try {
+            const appY = appEl ? Math.max(0, appEl.scrollTop || 0) : 0;
+            if (appY) return appY;
+          } catch (_) {
+            // no-op
+          }
+
+          try {
+            if (scrollTarget && scrollTarget !== window) return Math.max(0, scrollTarget.scrollTop || 0);
+          } catch (_) {
+            // no-op
+          }
+
+          return 0;
+        };
+
         const update = () => {
           rafId = 0;
           const viewportH = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1);
-          const y = (() => {
-            try {
-              if (scrollTarget === window) return Math.max(0, window.scrollY || window.pageYOffset || 0);
-              return Math.max(0, scrollTarget.scrollTop || 0);
-            } catch {
-              return Math.max(0, window.scrollY || window.pageYOffset || 0);
-            }
-          })();
+          const y = readScrollY();
           const progress = Math.max(0, Math.min(1, y / (viewportH * 1.1)));
           const scale = 1 + progress * 0.65;
           sentenceEl.style.transform = `scale(${scale.toFixed(3)})`;
@@ -4336,7 +4378,17 @@
           window.addEventListener("scroll", onScroll, { passive: true });
           state.learning._heroScrollTarget = window;
         }
-        requestAnimationFrame(update);
+
+        let loopRaf = 0;
+        const loop = () => {
+          loopRaf = requestAnimationFrame(loop);
+          update();
+        };
+        loopRaf = requestAnimationFrame(loop);
+        state.learning._heroScrollLoopCancel = () => {
+          if (loopRaf) cancelAnimationFrame(loopRaf);
+          loopRaf = 0;
+        };
       }
     }
 
@@ -4666,6 +4718,15 @@
       }
       state.learning._heroScrollHandler = null;
       state.learning._heroScrollTarget = null;
+    }
+
+    if (route.name !== "learning" && state.learning?._heroScrollLoopCancel) {
+      try {
+        state.learning._heroScrollLoopCancel();
+      } catch (_) {
+        // no-op
+      }
+      state.learning._heroScrollLoopCancel = null;
     }
 
     if (!state.home.featuredProjects.length) initHomeData();
