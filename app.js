@@ -4315,6 +4315,14 @@
 
         const scrollTarget = getScrollTarget();
 
+        const anchorEl = document.getElementById("learning-path") || sentenceEl;
+        let anchorStartTop = 0;
+        try {
+          anchorStartTop = anchorEl.getBoundingClientRect().top;
+        } catch (_) {
+          anchorStartTop = 0;
+        }
+
         const readScrollY = () => {
           try {
             const winY = Math.max(0, window.scrollY || window.pageYOffset || 0);
@@ -4355,10 +4363,20 @@
           return 0;
         };
 
+        const readScrollYFromLayout = () => {
+          try {
+            const top = anchorEl.getBoundingClientRect().top;
+            return Math.max(0, anchorStartTop - top);
+          } catch {
+            return 0;
+          }
+        };
+
         const update = () => {
           rafId = 0;
           const viewportH = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1);
-          const y = readScrollY();
+          let y = readScrollY();
+          if (!y) y = readScrollYFromLayout();
           const progress = Math.max(0, Math.min(1, y / (viewportH * 1.1)));
           const scale = 1 + progress * 0.65;
           sentenceEl.style.transform = `scale(${scale.toFixed(3)})`;
