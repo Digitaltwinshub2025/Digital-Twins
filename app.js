@@ -3963,7 +3963,7 @@
     };
 
     const ytLessonItem = {
-      title: "Digital Twin video lesson",
+      title: "Environmental Context Visualization",
       url: "https://youtu.be/BaDAIZ9jpuI",
     };
 
@@ -4005,7 +4005,20 @@
             String(it.url || "").includes("youtube.com/watch") ||
             String(it.url || "").includes("youtube.com/embed/BaDAIZ9jpuI"))
       );
-      if (!hasYtLesson) state.learning.sections.videos.items.push(ytLessonItem);
+      if (!hasYtLesson) {
+        state.learning.sections.videos.items.push(ytLessonItem);
+      } else {
+        state.learning.sections.videos.items = state.learning.sections.videos.items.map((it) => {
+          if (!it || typeof it !== "object") return it;
+          const url = String(it.url || "");
+          const isTarget =
+            url.includes("youtu.be/BaDAIZ9jpuI") ||
+            url.includes("youtube.com/embed/BaDAIZ9jpuI") ||
+            (url.includes("youtube.com/watch") && url.includes("v=BaDAIZ9jpuI"));
+          if (!isTarget) return it;
+          return { ...it, title: ytLessonItem.title, url: ytLessonItem.url };
+        });
+      }
     }
 
     const savedPathways = localStorage.getItem("learningHubPathways");
