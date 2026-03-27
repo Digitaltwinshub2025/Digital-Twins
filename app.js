@@ -2127,7 +2127,7 @@
         </section>
 
         <!-- Projects Showcase -->
-        <section class="w-full bg-gray-300">
+        <section class="w-full bg-gray-950 text-white">
           <div class="max-w-[90rem] mx-auto px-6 py-16 md:py-24">
             <div class="home-projects-hero">
               <div class="home-projects-hero-particles">
@@ -2150,24 +2150,24 @@
                   const img = (p.image || p.img || "https://placehold.co/640x420").replace(/^\//, "");
                   const id = p.id ? String(p.id) : "";
                   return `
-                    <div class="group rounded-2xl bg-white/60 backdrop-blur-sm border border-black/5 overflow-hidden shadow-sm">
+                    <div class="group rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 overflow-hidden shadow-sm">
                       <div class="relative overflow-hidden">
                         <img src="${escapeHtml(img)}" alt="${escapeHtml(p.title || "Project preview")}" class="w-full h-56 object-cover" />
-                        <span class="absolute top-3 left-3 rounded-full bg-black/80 text-white text-xs px-3 py-1" style="font-family:Poppins, ui-sans-serif">
+                        <span class="absolute top-3 left-3 rounded-full bg-white/10 text-white text-xs px-3 py-1 border border-white/15" style="font-family:Poppins, ui-sans-serif">
                           ${escapeHtml(p.category || "Project")}
                         </span>
                       </div>
                       <div class="p-5">
-                        <h4 class="text-lg font-semibold text-black" style="font-family:Poppins, ui-sans-serif">${escapeHtml(p.title || "Untitled Project")}</h4>
+                        <h4 class="text-lg font-semibold text-white" style="font-family:Poppins, ui-sans-serif">${escapeHtml(p.title || "Untitled Project")}</h4>
                         ${
                           p.summary || p.goal
-                            ? `<p class="mt-2 text-sm text-black/70 line-clamp-2" style="font-family:Poppins, ui-sans-serif, system-ui">
+                            ? `<p class="mt-2 text-sm text-white/70 line-clamp-2" style="font-family:Poppins, ui-sans-serif, system-ui">
                                 ${escapeHtml(p.summary || String(p.goal).split("\n")[0])}
                               </p>`
                             : ""
                         }
                         <a href="${id ? `#/projects/${encodeURIComponent(id)}` : "#/projects"}"
-                           class="mt-4 inline-flex items-center text-sm text-black/70 group-hover:text-black underline-offset-4 hover:underline"
+                           class="mt-4 inline-flex items-center text-sm text-white/70 group-hover:text-white underline-offset-4 hover:underline"
                            style="font-family:Poppins, ui-sans-serif">
                           View details
                         </a>
@@ -2180,7 +2180,7 @@
 
             <div class="mt-10 flex justify-center">
               <a href="#/projects">
-                <button class="rounded-full bg-black text-white px-6 py-3 hover:bg-gray-900 transition-colors text-base" style="font-family:Poppins, ui-sans-serif, system-ui">
+                <button class="rounded-full bg-white text-black px-6 py-3 hover:bg-gray-200 transition-colors text-base" style="font-family:Poppins, ui-sans-serif, system-ui">
                   Explore All Projects
                 </button>
               </a>
