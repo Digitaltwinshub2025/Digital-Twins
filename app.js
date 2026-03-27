@@ -761,107 +761,86 @@
 
           .dt-doc .meta-card span{
             color: #a9a9b3;
-            font-size: 13px;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
+
           }
 
-          .dt-doc .hero-right{
-            border-left: 1px solid rgba(255,255,255,0.08);
-            background:
-              linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)),
-              radial-gradient(circle at center, rgba(255,255,255,0.08), transparent 58%);
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 110px 40px 40px;
-          }
+        .dt-doc .section-head p{
+          margin: 0;
+          max-width: 520px;
+          color: #a9a9b3;
+          line-height: 1.8;
+        }
 
-          .dt-doc .showcase{
-            position: relative;
-            inset: auto;
-            width: 100%;
-            max-width: 640px;
-            height: min(560px, calc(100vh - 190px));
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 28px;
-            overflow: hidden;
-            background: linear-gradient(135deg, #15151c, #0d0d12 60%);
-            box-shadow: 0 24px 60px rgba(0,0,0,0.45);
-          }
+        .dt-doc .projects{ display:grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 
-          .dt-doc .showcase-inline{
-            display: none;
-            width: 100%;
-            max-width: 720px;
-            margin-top: 34px;
-          }
+        .dt-doc .project{
+          position: relative;
+          min-height: 420px;
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 28px;
+          overflow: hidden;
+          background: linear-gradient(180deg, #15151b, #0f1014);
+          box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+          transition: transform .28s ease, border-color .28s ease;
+        }
 
-          .dt-doc .showcase::before{
-            content: "";
-            position: absolute;
-            inset: 0;
-            background:
-              linear-gradient(180deg, rgba(255,255,255,0.02), transparent 36%),
-              radial-gradient(circle at 78% 18%, rgba(255,255,255,0.08), transparent 18%),
-              radial-gradient(circle at 18% 74%, rgba(255,255,255,0.05), transparent 24%);
-          }
+        .dt-doc .project:hover{
+          transform: translateY(-6px);
+          border-color: rgba(255,255,255,0.18);
+        }
 
-          .dt-doc .showcase-grid{
-            position: absolute;
-            inset: 0;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1.2fr 0.8fr;
-            gap: 1px;
-            background: rgba(255,255,255,0.08);
-          }
+        .dt-doc .project-visual{
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.48)),
+            radial-gradient(circle at top right, rgba(255,255,255,0.11), transparent 24%),
+            radial-gradient(circle at 15% 80%, rgba(255,255,255,0.07), transparent 22%),
+            linear-gradient(135deg, #1b1c24, #0e0f14 60%);
+        }
 
-          .dt-doc .showcase-card{
-            position: relative;
-            background: #111117;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            overflow: hidden;
-          }
+        .dt-doc .project-visual::before{
+          content: "";
+          position: absolute;
+          inset: 22px;
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 20px;
+        }
 
-          .dt-doc .showcase-card::after{
-            content: "";
-            position: absolute;
-            inset: auto -60px -60px auto;
-            width: 180px;
-            height: 180px;
-            border-radius: 999px;
-            background: rgba(255,255,255,0.06);
-            filter: blur(4px);
-          }
+        .dt-doc .project-content{
+          position: absolute;
+          inset: 0;
+          padding: 28px;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          gap: 18px;
+        }
 
-          .dt-doc .showcase-card small{
-            position: relative;
-            z-index: 1;
-            color: #bdbdc7;
-            font-size: 11px;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-          }
+        .dt-doc .project-top{ display:flex; justify-content: space-between; gap:16px; align-items:end; }
+        .dt-doc .project-label{ font-size: 11px; color: #c7c7cf; text-transform: uppercase; letter-spacing: 0.16em; margin-bottom: 10px; }
 
-          .dt-doc .showcase-card strong{
-            position: relative;
-            z-index: 1;
-            font-size: 1.25rem;
-            font-weight: 600;
-          }
+        .dt-doc .project h3{
+          margin: 0;
+          font-size: clamp(1.7rem, 3vw, 2.5rem);
+          letter-spacing: -0.04em;
+          line-height: 0.96;
+          text-transform: uppercase;
+        }
 
-          .dt-doc .section{ padding: 110px 28px 40px; }
-          .dt-doc .section-inner{ width: min(1400px, 100%); margin: 0 auto; }
+        .dt-doc .status{
+          white-space: nowrap;
+          color: #fff;
+          border: 1px solid rgba(255,255,255,0.16);
+          border-radius: 999px;
+          padding: 9px 12px;
+          font-size: 11px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+        }
 
-          .dt-doc .section-head{
-            display: flex;
-            justify-content: space-between;
+        .dt-doc .project p{ margin: 0; max-width: 540px; color: #a9a9b3; line-height: 1.8; }
+        .dt-doc .actions{ display:flex; flex-wrap: wrap; gap: 10px; }
             gap: 28px;
             align-items: end;
             margin-bottom: 36px;
@@ -995,13 +974,8 @@
 
           @media (max-width: 1100px) {
             .dt-doc .hero{ grid-template-columns: 1fr; }
-            .dt-doc .hero-right{ min-height: 58vh; border-left: 0; border-top: 1px solid rgba(255,255,255,0.08); padding: 40px 28px; }
-            .dt-doc .projects{ grid-template-columns: 1fr; }
-          }
-
-          @media (min-width: 1101px) {
-            .dt-doc .showcase-inline{ display: block; }
             .dt-doc .hero-right{ display: none; }
+            .dt-doc .projects{ grid-template-columns: 1fr; }
           }
 
           @media (max-width: 760px) {
@@ -1009,8 +983,6 @@
             .dt-doc .nav{ display: none; }
             .dt-doc .hero-left{ padding: 110px 22px 50px; }
             .dt-doc .hero-meta{ grid-template-columns: 1fr; }
-            .dt-doc .showcase{ inset: 24px; }
-            .dt-doc .showcase-grid{ grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); }
             .dt-doc .section{ padding: 84px 18px 26px; }
             .dt-doc .section-head{ flex-direction: column; align-items: start; }
             .dt-doc .project{ min-height: 380px; }
@@ -1036,15 +1008,6 @@
                   <a class="btn primary" href="#projects">View Projects</a>
                 </div>
 
-                <div class="showcase showcase-inline">
-                  <div class="showcase-grid">
-                    <div class="showcase-card"><small>Featured</small><strong>ShadeLA</strong></div>
-                    <div class="showcase-card"><small>Research</small><strong>Pando</strong></div>
-                    <div class="showcase-card"><small>Community</small><strong>USGBC</strong></div>
-                    <div class="showcase-card"><small>Landscape</small><strong>Baldwin Hills</strong></div>
-                  </div>
-                </div>
-
                 <div class="hero-meta">
                   <div class="meta-card">
                     <strong>07</strong>
@@ -1061,16 +1024,6 @@
                 </div>
               </div>
 
-              <div class="hero-right">
-                <div class="showcase">
-                  <div class="showcase-grid">
-                    <div class="showcase-card"><small>Featured</small><strong>ShadeLA</strong></div>
-                    <div class="showcase-card"><small>Research</small><strong>Pando</strong></div>
-                    <div class="showcase-card"><small>Community</small><strong>USGBC</strong></div>
-                    <div class="showcase-card"><small>Landscape</small><strong>Baldwin Hills</strong></div>
-                  </div>
-                </div>
-              </div>
             </section>
 
             <section class="section" id="projects">
@@ -1268,21 +1221,6 @@
       "PUHC PUEDE": "./Master-Documentation/assets/ALLYBOOM.png",
       "Reclamation": "./Master-Documentation/assets/ASU RE.png"
     };
-
-    root.querySelectorAll('.showcase-card').forEach((card) => {
-      const name = card.querySelector('strong')?.textContent?.trim() || '';
-      const img = imageByProjectName[name];
-      if (!img) return;
-      const imageUrl = encodeURI(img);
-      card.style.backgroundImage = [
-        'linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.55))',
-        'radial-gradient(circle at top right, rgba(255,255,255,0.10), transparent 26%)',
-        `url("${imageUrl}")`
-      ].join(', ');
-      card.style.backgroundSize = 'auto, auto, cover';
-      card.style.backgroundPosition = '0 0, 0 0, center';
-      card.style.backgroundRepeat = 'no-repeat, no-repeat, no-repeat';
-    });
 
     root.querySelectorAll('.project').forEach((card) => {
       const name = card.querySelector('h3')?.textContent?.trim() || '';
