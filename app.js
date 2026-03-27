@@ -1879,18 +1879,27 @@
             line-height: 1.05;
             white-space: nowrap;
             overflow: hidden;
-            width: 0;
+            width: auto;
             border-right: 3px solid #7dd3fc;
             background: linear-gradient(90deg, #ffffff, #7dd3fc, #c084fc, #ffffff);
             background-size: 220% auto;
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
+            color: transparent;
             text-shadow:
               0 0 12px rgba(255,255,255,0.08),
               0 0 24px rgba(125,211,252,0.16),
               0 0 34px rgba(192,132,252,0.12);
+            clip-path: none;
             animation:
-              homeTyping 2.2s steps(8, end) forwards,
+              homeBlink 0.8s step-end infinite,
+              homeShine 5s linear infinite;
+          }
+
+          .home-projects-hero-title.is-anim{
+            animation:
+              homeClipTyping 2.2s steps(8, end) forwards,
               homeBlink 0.8s step-end infinite,
               homeShine 5s linear infinite;
           }
@@ -1972,7 +1981,7 @@
           .home-projects-hero-subtitle b:nth-of-type(2)::after { animation-delay: 3.2s; }
           .home-projects-hero-subtitle b:nth-of-type(3)::after { animation-delay: 3.4s; }
 
-          @keyframes homeTyping { from { width: 0; } to { width: 8ch; } }
+          @keyframes homeClipTyping { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
           @keyframes homeBlink { 50% { border-color: transparent; } }
           @keyframes homeShine { from { background-position: 0% center; } to { background-position: 220% center; } }
           @keyframes homeFadeUp { to { opacity: 1; transform: translateY(0); } }
@@ -1992,6 +2001,7 @@
               white-space: normal;
               width: auto;
               border-right: none;
+              clip-path: none;
               animation: homeShine 5s linear infinite, homeFadeUp 1s ease forwards;
               opacity: 0;
             }
@@ -2126,7 +2136,7 @@
               </div>
 
               <section class="home-projects-hero-wrap">
-                <h3 class="home-projects-hero-title">Projects</h3>
+                <h3 class="home-projects-hero-title is-anim">Projects</h3>
                 <div class="home-projects-hero-subtitle">
                   <span>Explore featured <b>digital twin</b> initiatives across disciplines.</span>
                   <span>Dive into <b>simulations</b>, <b>analytics</b>, and <b>real-time models</b>.</span>
