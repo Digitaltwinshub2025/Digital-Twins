@@ -791,6 +791,13 @@
             box-shadow: 0 24px 60px rgba(0,0,0,0.45);
           }
 
+          .dt-doc .showcase-inline{
+            display: none;
+            width: 100%;
+            max-width: 720px;
+            margin-top: 34px;
+          }
+
           .dt-doc .showcase::before{
             content: "";
             position: absolute;
@@ -992,6 +999,11 @@
             .dt-doc .projects{ grid-template-columns: 1fr; }
           }
 
+          @media (min-width: 1101px) {
+            .dt-doc .showcase-inline{ display: block; }
+            .dt-doc .hero-right{ display: none; }
+          }
+
           @media (max-width: 760px) {
             .dt-doc .topbar{ padding: 16px 18px; }
             .dt-doc .nav{ display: none; }
@@ -1023,6 +1035,16 @@
                 <div class="hero-actions">
                   <a class="btn primary" href="#projects">View Projects</a>
                 </div>
+
+                <div class="showcase showcase-inline">
+                  <div class="showcase-grid">
+                    <div class="showcase-card"><small>Featured</small><strong>ShadeLA</strong></div>
+                    <div class="showcase-card"><small>Research</small><strong>Pando</strong></div>
+                    <div class="showcase-card"><small>Community</small><strong>USGBC</strong></div>
+                    <div class="showcase-card"><small>Landscape</small><strong>Baldwin Hills</strong></div>
+                  </div>
+                </div>
+
                 <div class="hero-meta">
                   <div class="meta-card">
                     <strong>07</strong>
