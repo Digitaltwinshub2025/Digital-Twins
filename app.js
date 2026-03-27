@@ -1817,6 +1817,187 @@
     appEl.innerHTML = `
       <div class="flex flex-col transition-all duration-500 ease-out opacity-100 translate-y-0">
 
+        <style>
+          .home-projects-hero{
+            position: relative;
+            overflow: hidden;
+            border-radius: 28px;
+            padding: 58px 28px;
+            background:
+              radial-gradient(circle at 20% 20%, rgba(125,211,252,0.10), transparent 30%),
+              radial-gradient(circle at 80% 15%, rgba(192,132,252,0.12), transparent 28%),
+              radial-gradient(circle at 50% 80%, rgba(59,130,246,0.08), transparent 30%),
+              linear-gradient(180deg, #0f172a, #020617);
+            box-shadow: 0 28px 70px rgba(0,0,0,0.28);
+          }
+
+          .home-projects-hero-particles{
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+          }
+
+          .home-projects-hero-particles span{
+            position: absolute;
+            display: block;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+            box-shadow: 0 0 12px rgba(125,211,252,0.25);
+            animation: homeFloatParticle linear infinite;
+          }
+
+          .home-projects-hero-particles span:nth-child(1)  { left: 8%;  top: 85%; animation-duration: 14s; animation-delay: 0s; }
+          .home-projects-hero-particles span:nth-child(2)  { left: 16%; top: 70%; animation-duration: 18s; animation-delay: 2s; }
+          .home-projects-hero-particles span:nth-child(3)  { left: 28%; top: 90%; animation-duration: 16s; animation-delay: 1s; }
+          .home-projects-hero-particles span:nth-child(4)  { left: 36%; top: 78%; animation-duration: 20s; animation-delay: 3s; }
+          .home-projects-hero-particles span:nth-child(5)  { left: 48%; top: 88%; animation-duration: 13s; animation-delay: 2s; }
+          .home-projects-hero-particles span:nth-child(6)  { left: 58%; top: 74%; animation-duration: 17s; animation-delay: 4s; }
+          .home-projects-hero-particles span:nth-child(7)  { left: 68%; top: 92%; animation-duration: 15s; animation-delay: 1s; }
+          .home-projects-hero-particles span:nth-child(8)  { left: 78%; top: 82%; animation-duration: 19s; animation-delay: 0s; }
+          .home-projects-hero-particles span:nth-child(9)  { left: 88%; top: 89%; animation-duration: 16s; animation-delay: 3s; }
+          .home-projects-hero-particles span:nth-child(10) { left: 94%; top: 76%; animation-duration: 14s; animation-delay: 2s; }
+
+          .home-projects-hero-wrap{
+            position: relative;
+            z-index: 2;
+            max-width: 920px;
+            margin: 0 auto;
+            width: 100%;
+            text-align: center;
+          }
+
+          .home-projects-hero-title{
+            display: inline-block;
+            font-family: "Orbitron", Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 800;
+            letter-spacing: 2px;
+            line-height: 1.05;
+            white-space: nowrap;
+            overflow: hidden;
+            width: 0;
+            border-right: 3px solid #7dd3fc;
+            background: linear-gradient(90deg, #ffffff, #7dd3fc, #c084fc, #ffffff);
+            background-size: 220% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow:
+              0 0 12px rgba(255,255,255,0.08),
+              0 0 24px rgba(125,211,252,0.16),
+              0 0 34px rgba(192,132,252,0.12);
+            animation:
+              homeTyping 2.2s steps(8, end) forwards,
+              homeBlink 0.8s step-end infinite,
+              homeShine 5s linear infinite;
+          }
+
+          .home-projects-hero-subtitle{
+            margin: 34px auto 0;
+            max-width: 760px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            padding: 24px 28px;
+            border-radius: 22px;
+            background: rgba(255,255,255,0.035);
+            border: 1px solid rgba(255,255,255,0.08);
+            backdrop-filter: blur(14px);
+            box-shadow:
+              0 0 40px rgba(0,0,0,0.22),
+              0 0 50px rgba(192, 132, 252, 0.18),
+              inset 0 0 30px rgba(255,255,255,0.02);
+            opacity: 0;
+            transform: translateY(24px);
+            animation: homeFadeUp 1s ease forwards;
+            animation-delay: 2.25s;
+            transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+            text-align: left;
+            font-family: "Space Grotesk", Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+          }
+
+          .home-projects-hero-subtitle:hover{
+            transform: translateY(-4px);
+            border-color: rgba(125,211,252,0.28);
+            box-shadow:
+              0 0 40px rgba(0,0,0,0.24),
+              0 0 70px rgba(125, 211, 252, 0.22),
+              0 0 90px rgba(192, 132, 252, 0.18),
+              inset 0 0 30px rgba(255,255,255,0.03);
+          }
+
+          .home-projects-hero-subtitle span{
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            line-height: 1.9;
+            color: rgba(255,255,255,0.72);
+            opacity: 0;
+            transform: translateY(14px);
+            animation: homeLineReveal 0.8s ease forwards;
+            position: relative;
+          }
+
+          .home-projects-hero-subtitle span:nth-child(1) { animation-delay: 2.45s; }
+          .home-projects-hero-subtitle span:nth-child(2) { animation-delay: 2.85s; }
+
+          .home-projects-hero-subtitle b{
+            font-weight: 600;
+            background: linear-gradient(90deg, #7dd3fc, #c084fc);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            animation: homeShine 4s linear infinite;
+          }
+
+          .home-projects-hero-subtitle b::after{
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -4px;
+            width: 100%;
+            height: 2px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(125,211,252,0.95), rgba(192,132,252,0.95));
+            opacity: 0.9;
+            box-shadow: 0 0 12px rgba(125,211,252,0.35);
+            transform: scaleX(0);
+            transform-origin: left;
+            animation: homeUnderlineGrow 0.9s ease forwards;
+          }
+
+          .home-projects-hero-subtitle b:nth-of-type(1)::after { animation-delay: 3s; }
+          .home-projects-hero-subtitle b:nth-of-type(2)::after { animation-delay: 3.2s; }
+          .home-projects-hero-subtitle b:nth-of-type(3)::after { animation-delay: 3.4s; }
+
+          @keyframes homeTyping { from { width: 0; } to { width: 8ch; } }
+          @keyframes homeBlink { 50% { border-color: transparent; } }
+          @keyframes homeShine { from { background-position: 0% center; } to { background-position: 220% center; } }
+          @keyframes homeFadeUp { to { opacity: 1; transform: translateY(0); } }
+          @keyframes homeLineReveal { to { opacity: 1; transform: translateY(0); } }
+          @keyframes homeUnderlineGrow { to { transform: scaleX(1); } }
+
+          @keyframes homeFloatParticle {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            10% { opacity: 1; }
+            80% { opacity: 0.85; }
+            100% { transform: translateY(-120vh) scale(1.8); opacity: 0; }
+          }
+
+          @media (max-width: 640px) {
+            .home-projects-hero-subtitle{ padding: 20px 18px; }
+            .home-projects-hero-title{
+              white-space: normal;
+              width: auto;
+              border-right: none;
+              animation: homeShine 5s linear infinite, homeFadeUp 1s ease forwards;
+              opacity: 0;
+            }
+          }
+        </style>
+
         <!-- Hero Section -->
         <section class="w-full bg-gray-950 relative overflow-hidden">
           <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.22),_transparent_60%)]"></div>
@@ -1938,11 +2119,19 @@
         <!-- Projects Showcase -->
         <section class="w-full bg-gray-300">
           <div class="max-w-[90rem] mx-auto px-6 py-16 md:py-24">
-            <div class="flex flex-col items-center text-center">
-              <h3 class="text-black text-4xl sm:text-5xl md:text-6xl" style="font-family:Poppins, ui-sans-serif">Projects</h3>
-              <p class="mt-4 text-black/70 max-w-2xl text-base md:text-lg" style="font-family:Poppins, ui-sans-serif, system-ui">
-                Explore featured digital twin initiatives across disciplines. Dive into simulations, analytics, and real-time models.
-              </p>
+            <div class="home-projects-hero">
+              <div class="home-projects-hero-particles">
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+
+              <section class="home-projects-hero-wrap">
+                <h3 class="home-projects-hero-title">Projects</h3>
+                <div class="home-projects-hero-subtitle">
+                  <span>Explore featured <b>digital twin</b> initiatives across disciplines.</span>
+                  <span>Dive into <b>simulations</b>, <b>analytics</b>, and <b>real-time models</b>.</span>
+                </div>
+              </section>
             </div>
 
             <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
