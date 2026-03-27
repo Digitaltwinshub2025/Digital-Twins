@@ -849,9 +849,11 @@
           .dt-doc .section-head h2{
             margin: 0;
             font-size: clamp(2rem, 4vw, 4rem);
-            letter-spacing: -0.05em;
-            line-height: 0.95;
+            letter-spacing: -0.06em;
+            line-height: 0.92;
             text-transform: uppercase;
+            font-weight: 700;
+            font-family: Inter, Arial, Helvetica, sans-serif;
             background: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,255,255,0.55));
             -webkit-background-clip: text;
             background-clip: text;
@@ -899,11 +901,23 @@
             background: linear-gradient(180deg, #15151b, #0f1014);
             box-shadow: 0 24px 60px rgba(0,0,0,0.45);
             transition: transform .28s ease, border-color .28s ease;
+            opacity: 0;
+            transform: translateY(14px);
           }
 
           .dt-doc .project:hover{
             transform: translateY(-6px);
             border-color: rgba(255,255,255,0.18);
+          }
+
+          @keyframes dtDocCardIn{
+            from{ opacity: 0; transform: translateY(14px); filter: blur(6px); }
+            to{ opacity: 1; transform: translateY(0); filter: blur(0px); }
+          }
+
+          .dt-doc .project.is-anim{
+            animation: dtDocCardIn 760ms cubic-bezier(.2,.8,.2,1) forwards;
+            animation-delay: var(--doc-card-delay, 0ms);
           }
 
           .dt-doc .project-visual{
@@ -1231,6 +1245,18 @@
           el.classList.remove('is-anim');
           void el.offsetWidth;
           el.classList.add('is-anim');
+        });
+      } catch (_) {
+        // no-op
+      }
+
+      try {
+        const cards = Array.from(root.querySelectorAll('.project'));
+        cards.forEach((card, idx) => {
+          card.classList.remove('is-anim');
+          card.style.setProperty('--doc-card-delay', `${Math.min(idx * 90, 540)}ms`);
+          void card.offsetWidth;
+          card.classList.add('is-anim');
         });
       } catch (_) {
         // no-op
