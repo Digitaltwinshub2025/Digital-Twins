@@ -532,7 +532,7 @@ window.PROJECTS_CATALOG = [
   },
   {
     id: '06',
-    title: 'Alley Bloom — Water Alley ',
+    title: 'PUHC Innovation Alleys',
     category: 'Urban Climate Resilience',
     owner: 'Michael',
     teamMemberFirstName: 'Michael',
