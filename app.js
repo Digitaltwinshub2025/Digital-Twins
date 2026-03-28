@@ -2137,7 +2137,7 @@
               </div>
 
               <section class="home-projects-hero-wrap">
-                <h3 class="home-projects-hero-title is-anim">Projects</h3>
+                <h3 class="home-projects-hero-title">Projects</h3>
                 <div class="home-projects-hero-subtitle">
                   <span>Explore featured <b>digital twin</b> initiatives across disciplines.</span>
                   <span>Dive into <b>simulations</b>, <b>analytics</b>, and <b>real-time models</b>.</span>
@@ -2336,6 +2336,73 @@
       state.home.showTerms = false;
       render();
     });
+
+    // Projects hero animation: trigger when scrolled into view, and re-trigger on scroll up/down.
+    try {
+      if (state.home._projectsHeroObserver && typeof state.home._projectsHeroObserver.disconnect === "function") {
+        state.home._projectsHeroObserver.disconnect();
+      }
+    } catch (_) {
+      // no-op
+    }
+
+    const restartHomeProjectsHero = () => {
+      try {
+        const hero = appEl.querySelector(".home-projects-hero");
+        if (!hero) return;
+
+        const titleEl = hero.querySelector(".home-projects-hero-title");
+        if (titleEl) {
+          titleEl.classList.remove("is-anim");
+          void titleEl.offsetWidth;
+          titleEl.classList.add("is-anim");
+        }
+
+        const subtitleEl = hero.querySelector(".home-projects-hero-subtitle");
+        if (subtitleEl) {
+          subtitleEl.style.animation = "none";
+          void subtitleEl.offsetWidth;
+          subtitleEl.style.animation = "";
+
+          Array.from(subtitleEl.querySelectorAll("span")).forEach((span) => {
+            span.style.animation = "none";
+            void span.offsetWidth;
+            span.style.animation = "";
+          });
+        }
+      } catch (_) {
+        // no-op
+      }
+    };
+
+    try {
+      const hero = appEl.querySelector(".home-projects-hero");
+      if (hero && typeof IntersectionObserver !== "undefined") {
+        let isInView = false;
+        const io = new IntersectionObserver(
+          (entries) => {
+            const entry = entries && entries[0];
+            if (!entry) return;
+
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.45) {
+              if (!isInView) restartHomeProjectsHero();
+              isInView = true;
+            } else {
+              isInView = false;
+            }
+          },
+          { threshold: [0, 0.25, 0.45, 0.6, 0.8, 1] }
+        );
+
+        io.observe(hero);
+        state.home._projectsHeroObserver = io;
+      } else {
+        // Fallback: if IntersectionObserver isn't available, run once on next frame.
+        requestAnimationFrame(restartHomeProjectsHero);
+      }
+    } catch (_) {
+      requestAnimationFrame(restartHomeProjectsHero);
+    }
   }
 
   let leaderTransitionTimeout = null;
